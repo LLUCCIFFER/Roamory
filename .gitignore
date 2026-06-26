@@ -9,6 +9,7 @@ artifacts/*
 !artifacts/
 !artifacts/home-desktop.png
 !artifacts/trip-edit-saved-desktop.png
+!artifacts/route-map-desktop.png
 !artifacts/footprint-home-desktop.png
 !artifacts/share-poster-desktop.png
 !artifacts/settings-desktop.png

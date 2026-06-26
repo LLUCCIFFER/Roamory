@@ -127,6 +127,21 @@ Complete
 - [ ] Push the local commit to GitHub after `github.com:443` connectivity is restored.
 - **Status:** implementation complete; remote push blocked by network connectivity
 
+### Phase 15: Round 10 Route Adapter & Map Panel
+- [x] Add normalized route calculation types.
+- [x] Add server-side Gaode route adapter boundary with in-memory cache.
+- [x] Add `POST /api/routes/calculate`.
+- [x] Add pending fallback when Gaode Web Service key is missing or route requests fail.
+- [x] Connect `/trips/[tripId]` to route calculation and route label updates.
+- [x] Show a route map panel with POI markers, daily route line, total duration, distance, and pending state.
+- [x] Recalculate route labels after route reorder/edit operations.
+- [x] Update README, TODO, findings, and progress.
+- [x] Run typecheck and browser route-panel checks.
+- [x] Create a local git commit for this round.
+- [ ] Push the local commits to GitHub after `github.com:443` connectivity is restored.
+- [ ] Configure Gaode JS SDK key and validate fully confirmed real transit durations.
+- **Status:** partial Round 10 complete; remote push blocked by network; true Gaode SDK/key validation remains
+
 ## Key Questions
 1. What is the smallest valuable MVP loop for Roamory?
 2. Which features should be P0, P1, and P2 to avoid scope creep?
@@ -156,6 +171,8 @@ Complete
 | Keep the visible generation UI stable while changing the state source to API polling | This avoids visual churn and lets backend contract work land cleanly. |
 | Treat `/settings` as the local-first account bridge | It closes Round 9 without introducing real auth before sync infrastructure exists. |
 | Push each completed development round to GitHub with a brief commit summary | The user requested upload after each follow-up update; if GitHub connectivity is unavailable, keep the local commit ready and retry push once the network is restored. |
+| Expose route data through a normalized API instead of raw Gaode fields | Keeps the frontend portable and satisfies the Round 10 privacy/adapter boundary requirement. |
+| Use a pending map panel when Gaode keys are absent | It improves route credibility without pretending unavailable provider data is confirmed. |
 
 ## Errors Encountered
 | Error | Attempt | Resolution |
@@ -172,6 +189,7 @@ Complete
 | Running `next build` while `next dev` served 3001 mixed development and production `.next` chunks | 1 | Stopped Roamory Next processes, verified `.next` was inside the workspace, removed the generated cache, restarted only the 3001 dev server, and reran timestamp-filtered browser checks. |
 | Share poster default privacy caused a hydration mismatch after reading localStorage during initial render | 1 | Split static default poster privacy from client-mounted privacy settings and applied saved settings in `useEffect`. |
 | `git push -u origin main` could not reach GitHub over port 443 | 2 | Local commit is complete; retry push after network connectivity to GitHub is restored. |
+| Second-round push after route work still failed against GitHub over port 443 | 1 | Current local branch has both commits ready; retry `git push -u origin main` when the network recovers. |
 
 ## Notes
 - Use `frontend-design` guidance for a distinctive, non-template visual direction.

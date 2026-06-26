@@ -448,3 +448,47 @@ Notes:
 - Running `next build` while `next dev` was serving 3001 mixed development and production chunks in `.next`. The dev server was stopped, `.next` was safely removed as generated cache inside the workspace, and 3001 was restarted cleanly.
 - Share poster privacy defaults were split into a static SSR-safe default and a client-mounted local settings default to remove a hydration mismatch.
 - Git was initialized and the update was committed locally. Push to `https://github.com/LLUCCIFFER/Roamory.git` was attempted twice but failed because this environment could not connect to `github.com:443`; retry with `git push -u origin main` after network connectivity returns.
+
+### Phase 15: Round 10 Route Adapter & Map Panel
+- **Status:** partial complete
+- **Started:** 2026-06-26
+- Actions taken:
+  - Added normalized route calculation types in `lib/route-types.ts`.
+  - Added `lib/server/gaode-route-adapter.ts` with seeded POI resolution, optional Gaode Web Service calls, fallback estimates, and in-memory route cache.
+  - Added `POST /api/routes/calculate`.
+  - Connected `/trips/[tripId]` to route calculation.
+  - Updated route labels after route calculation and after reorder/edit changes.
+  - Replaced the old route placeholder with a map-like route panel showing POI markers, daily route, duration, distance, and pending/confirmed status.
+  - Updated README demo preview with `artifacts/route-map-desktop.png`.
+- Files created/modified:
+  - `lib/route-types.ts` (created)
+  - `lib/server/gaode-route-adapter.ts` (created)
+  - `app/api/routes/calculate/route.ts` (created)
+  - `app/trips/[tripId]/page.tsx` (updated)
+  - `app/globals.css` (updated)
+  - `.gitignore` (updated)
+  - `README.md` (updated)
+  - `TODO.md` (updated)
+  - `task_plan.md` (updated)
+  - `findings.md` (updated)
+  - `progress.md` (updated)
+
+## Test Results - 2026-06-26 Route Adapter & Map Panel
+| Test | Input | Expected | Actual | Status |
+|------|-------|----------|--------|--------|
+| TypeScript | `npm run typecheck` | No type errors | Passed | Pass |
+| Route API | `POST /api/routes/calculate` | Standard route object with pending fallback when no key | Passed | Pass |
+| Route panel | Open `/trips/mock-hangzhou` | Shows POI markers and daily route panel | Passed | Pass |
+| Timeline labels | Open trip result | Stop labels include route pending durations | Passed | Pass |
+| Reorder recalculation | Move second stop up | Route labels remain recalculated/pending | Passed | Pass |
+| Browser layout | Desktop and 390px mobile | No horizontal overflow | Passed | Pass |
+| Console | Timestamp-filtered browser check | No new page console errors | Passed | Pass |
+
+Generated screenshots:
+- `artifacts/route-map-desktop.png`
+- `artifacts/route-map-mobile.png`
+
+Notes:
+- `AMAP_WEB_SERVICE_KEY` is not configured locally, so route results intentionally show `pending` and preserve saveability.
+- Full Gaode JS SDK rendering and confirmed real transit duration verification remain open until provider keys are available.
+- Local commit `560378c feat: add route calibration panel` was created. Push to GitHub was retried, but `github.com:443` still failed with a connection reset.

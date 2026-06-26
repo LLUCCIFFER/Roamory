@@ -45,6 +45,8 @@
 - Source PRD: `D:\DEMO\Roamory\AI_Travel_Memory_PRD.md`
 - Planned outputs: `D:\DEMO\Roamory\PRD.md`, `D:\DEMO\Roamory\DESIGN.md`, `D:\DEMO\Roamory\TODO.md`
 - Working files: `D:\DEMO\Roamory\task_plan.md`, `D:\DEMO\Roamory\findings.md`, `D:\DEMO\Roamory\progress.md`
+- Gaode route planning docs: `https://lbs.amap.com/api/webservice/guide/api/direction`
+- Gaode route planning 2.0 docs: `https://lbs.amap.com/api/webservice/guide/api/newroute`
 
 ## Visual/Browser Findings
 - Reference image details: pastel sky-blue watercolor background; cloud and mountain texture; white lace dividers; rounded pill navigation; large rounded display heading; central beach/destination carousel; `SUMMER` season selector; thumbnail strip; translucent frosted diary card; profile/day-life diary section; stacked image cards; small circular icon buttons; decorative white flowers and butterflies; handwritten quote on a white panel.
@@ -79,3 +81,8 @@
 - Share poster defaults must not read localStorage during initial render; saved privacy settings are applied after mount to avoid SSR/client hydration mismatch.
 - Running `next build` while `next dev` serves the same `.next` directory can mix production and development chunks. Stop dev before production builds or restart dev and clear generated `.next` cache afterward.
 - README now includes committed demo screenshots from `artifacts/` while logs and temporary audit files remain ignored.
+- Round 10 route work now has a normalized route boundary: `/api/routes/calculate` returns app-owned POI, leg, status, distance, and duration fields, so the frontend does not depend on raw Gaode response shapes.
+- `lib/server/gaode-route-adapter.ts` supports seeded POI resolution for the current Hangzhou mock trip and optional Gaode Web Service route calls when `AMAP_WEB_SERVICE_KEY` is configured.
+- Without a Gaode key, route calculation falls back to estimated pending legs. The UI shows `待确认` and keeps the trip saveable.
+- The result page route panel now shows POI markers, a daily route line, duration, distance, and pending reason; route labels update after point reordering.
+- Full Gaode JS SDK rendering and true provider-confirmed transit duration are intentionally left open until provider keys are available.

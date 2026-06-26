@@ -10,6 +10,7 @@ import {
   Clock3,
   Copy,
   ImagePlus,
+  LocateFixed,
   Lock,
   LockKeyhole,
   MapPinned,
@@ -36,6 +37,7 @@ import {
   saveAlbumThumbnail,
   saveSavedTrip
 } from "../../../lib/storage";
+import type { GeoPoint, RouteCalculationResult } from "../../../lib/route-types";
 import type { SavedTrip, SavedTripDay, SavedTripStop } from "../../../lib/storage";
 
 const replacementStops = [
@@ -125,6 +127,34 @@ function parseMinutes(value: string) {
   return match ? Number.parseInt(match[1], 10) : 0;
 }
 
+function createRouteSignature(trip: SavedTrip, dayIndex: number) {
+  const day = trip.days[dayIndex] ?? trip.days[0];
+  return `${trip.id}:${dayIndex}:${trip.destination}:${day?.stops.map((stop) => `${stop.id}:${stop.name}`).join(">")}`;
+}
+
+function applyRouteResult(
+  trip: SavedTrip,
+  dayIndex: number,
+  expectedSignature: string,
+  route: RouteCalculationResult
+): SavedTrip {
+  if (createRouteSignature(trip, dayIndex) !== expectedSignature) return trip;
+  const nextTrip: SavedTrip = {
+    ...trip,
+    days: trip.days.map((day, index) => {
+      if (index !== dayIndex) return day;
+      return {
+        ...day,
+        stops: day.stops.map((stop, stopIndex) => {
+          const leg = route.legs[stopIndex];
+          return leg ? { ...stop, transportToNext: leg.label } : { ...stop, transportToNext: "今日结束" };
+        })
+      };
+    })
+  };
+  return recalculateTrip(nextTrip);
+}
+
 export default function TripResultPage() {
   const [trip, setTrip] = useState<SavedTrip>(() => createEditableTrip());
   const [activeDay, setActiveDay] = useState(0);
@@ -137,11 +167,22 @@ export default function TripResultPage() {
   const [shareError, setShareError] = useState("");
   const [feedback, setFeedback] = useState("");
   const [showAccountPrompt, setShowAccountPrompt] = useState(false);
+  const [routeResult, setRouteResult] = useState<RouteCalculationResult | null>(null);
+  const [routeLoading, setRouteLoading] = useState(false);
+  const [routeError, setRouteError] = useState("");
 
   const day = trip.days[activeDay] ?? trip.days[0];
   const totalStops = useMemo(
     () => trip.days.reduce((count, item) => count + item.stops.length, 0),
     [trip.days]
+  );
+  const activeRouteSignature = useMemo(
+    () => createRouteSignature(trip, activeDay),
+    [activeDay, trip]
+  );
+  const routeLegByStopId = useMemo(
+    () => new Map(routeResult?.legs.map((leg) => [leg.fromStopId, leg]) ?? []),
+    [routeResult]
   );
 
   useEffect(() => {
@@ -156,6 +197,55 @@ export default function TripResultPage() {
       setTrip(createEditableTrip(task.draft.destination));
     }
   }, []);
+
+  useEffect(() => {
+    if (!day || day.stops.length < 2) return;
+    let ignore = false;
+    setRouteLoading(true);
+    setRouteError("");
+
+    fetch("/api/routes/calculate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tripId: trip.id,
+        city: trip.destination,
+        dayIndex: activeDay,
+        stops: day.stops.map((stop) => ({
+          id: stop.id,
+          name: stop.name,
+          city: trip.destination,
+          time: stop.time
+        }))
+      })
+    })
+      .then(async (response) => {
+        const payload = (await response.json()) as {
+          route?: RouteCalculationResult;
+          message?: string;
+        };
+        if (!response.ok || !payload.route) {
+          throw new Error(payload.message || "路线计算失败。");
+        }
+        return payload.route;
+      })
+      .then((route) => {
+        if (ignore) return;
+        setRouteResult(route);
+        setTrip((currentTrip) => applyRouteResult(currentTrip, activeDay, activeRouteSignature, route));
+      })
+      .catch((error) => {
+        if (ignore) return;
+        setRouteError(error instanceof Error ? error.message : "路线计算失败。");
+      })
+      .finally(() => {
+        if (!ignore) setRouteLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [activeDay, activeRouteSignature, trip.destination, trip.id]);
 
   async function generateShareLink() {
     setShareLoading(true);
@@ -488,7 +578,17 @@ export default function TripResultPage() {
                       <span key={tag}>{tag}</span>
                     ))}
                   </div>
-                  <span className="route-note">{stop.duration} · {stop.transportToNext}</span>
+                  <span
+                    className={[
+                      "route-note",
+                      routeLegByStopId.get(stop.id)?.status === "confirmed" ? "confirmed" : "",
+                      routeLegByStopId.get(stop.id)?.status === "pending" ? "pending" : ""
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  >
+                    {stop.duration} · {stop.transportToNext}
+                  </span>
                   {editMode && (
                     <div className="stop-editor-actions" aria-label={`${stop.name} 编辑操作`}>
                       <button
@@ -545,9 +645,12 @@ export default function TripResultPage() {
 
         <aside className="result-side">
           <section className="map-placeholder glass-card">
-            <MapPinned size={34} />
-            <h2>高德路线校准</h2>
-            <p>路线与交通时间会在地图校准后显示在这里。</p>
+            <RouteMapPanel
+              dayTitle={day.title}
+              error={routeError}
+              loading={routeLoading}
+              route={routeResult}
+            />
           </section>
 
           <section className="privacy-check glass-card">
@@ -622,4 +725,111 @@ export default function TripResultPage() {
       </section>
     </main>
   );
+}
+
+function RouteMapPanel({
+  dayTitle,
+  error,
+  loading,
+  route
+}: {
+  dayTitle: string;
+  error: string;
+  loading: boolean;
+  route: RouteCalculationResult | null;
+}) {
+  const projectedPois = useMemo(() => projectPois(route?.pois.map((poi) => poi.location) ?? []), [route]);
+  const totalMinutes = route?.summary.totalMinutes;
+  const totalDistance = route?.summary.totalDistanceMeters;
+
+  return (
+    <div className="route-map-panel">
+      <div className="section-title">
+        <div>
+          <p>Gaode Route</p>
+          <h2>高德路线校准</h2>
+        </div>
+        <span>
+          <LocateFixed size={22} />
+        </span>
+      </div>
+
+      <div className="route-map-stage" aria-label={`${dayTitle} 路线地图`}>
+        <svg className="route-line-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          {projectedPois.slice(0, -1).map((point, index) => {
+            const nextPoint = projectedPois[index + 1];
+            if (!nextPoint) return null;
+            return (
+              <line
+                key={`${point.x}-${point.y}-${index}`}
+                x1={point.x}
+                x2={nextPoint.x}
+                y1={point.y}
+                y2={nextPoint.y}
+              />
+            );
+          })}
+        </svg>
+        {route?.pois.map((poi, index) => {
+          const point = projectedPois[index] ?? { x: 50, y: 50 };
+          return (
+            <span
+              className="route-marker"
+              key={poi.stopId}
+              style={{
+                left: `${point.x}%`,
+                top: `${point.y}%`
+              }}
+              title={poi.name}
+            >
+              {index + 1}
+            </span>
+          );
+        })}
+        {!route && (
+          <div className="route-map-empty">
+            <MapPinned size={28} />
+            <span>{loading ? "正在校准路线" : "等待路线数据"}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="route-map-summary">
+        <span>{loading ? "校准中" : route?.status === "confirmed" ? "高德已确认" : "待确认"}</span>
+        <span>{totalMinutes === null || totalMinutes === undefined ? "时间待确认" : `${totalMinutes} 分钟`}</span>
+        <span>{formatDistance(totalDistance)}</span>
+      </div>
+
+      {error ? (
+        <p className="inline-error">{error}</p>
+      ) : route?.summary.pendingReason ? (
+        <p className="inline-success route-pending-note">{route.summary.pendingReason}</p>
+      ) : (
+        <p className="route-confirmed-note">路线结果已标准化，前端不读取高德原始字段。</p>
+      )}
+    </div>
+  );
+}
+
+function projectPois(points: GeoPoint[]) {
+  if (points.length === 0) return [];
+  const lngs = points.map((point) => point.lng);
+  const lats = points.map((point) => point.lat);
+  const minLng = Math.min(...lngs);
+  const maxLng = Math.max(...lngs);
+  const minLat = Math.min(...lats);
+  const maxLat = Math.max(...lats);
+  const lngRange = Math.max(maxLng - minLng, 0.001);
+  const latRange = Math.max(maxLat - minLat, 0.001);
+
+  return points.map((point) => ({
+    x: 14 + ((point.lng - minLng) / lngRange) * 72,
+    y: 14 + (1 - (point.lat - minLat) / latRange) * 72
+  }));
+}
+
+function formatDistance(value: number | null | undefined) {
+  if (value === null || value === undefined) return "距离待确认";
+  if (value >= 1000) return `${(value / 1000).toFixed(1)} km`;
+  return `${value} m`;
 }
