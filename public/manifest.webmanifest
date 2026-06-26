@@ -1,0 +1,10 @@
+{
+  "name": "Roamory",
+  "short_name": "Roamory",
+  "description": "AI travel planning that becomes a personal travel diary.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#BFE8FA",
+  "theme_color": "#BFE8FA",
+  "icons": []
+}
