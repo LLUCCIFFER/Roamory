@@ -47,6 +47,12 @@
 - Working files: `D:\DEMO\Roamory\task_plan.md`, `D:\DEMO\Roamory\findings.md`, `D:\DEMO\Roamory\progress.md`
 - Gaode route planning docs: `https://lbs.amap.com/api/webservice/guide/api/direction`
 - Gaode route planning 2.0 docs: `https://lbs.amap.com/api/webservice/guide/api/newroute`
+- Open-Meteo docs: `https://open-meteo.com/`
+- Open-Meteo pricing: `https://open-meteo.com/en/pricing`
+- OpenRouteService plans: `https://staging.openrouteservice.org/plans/`
+- Nominatim usage policy: `https://operations.osmfoundation.org/policies/nominatim/`
+- Gemini API pricing: `https://ai.google.dev/gemini-api/docs/pricing`
+- Gemini API rate limits: `https://ai.google.dev/gemini-api/docs/rate-limits`
 
 ## Visual/Browser Findings
 - Reference image details: pastel sky-blue watercolor background; cloud and mountain texture; white lace dividers; rounded pill navigation; large rounded display heading; central beach/destination carousel; `SUMMER` season selector; thumbnail strip; translucent frosted diary card; profile/day-life diary section; stacked image cards; small circular icon buttons; decorative white flowers and butterflies; handwritten quote on a white panel.
@@ -82,7 +88,10 @@
 - Running `next build` while `next dev` serves the same `.next` directory can mix production and development chunks. Stop dev before production builds or restart dev and clear generated `.next` cache afterward.
 - README now includes committed demo screenshots from `artifacts/` while logs and temporary audit files remain ignored.
 - Round 10 route work now has a normalized route boundary: `/api/routes/calculate` returns app-owned POI, leg, status, distance, and duration fields, so the frontend does not depend on raw Gaode response shapes.
-- `lib/server/gaode-route-adapter.ts` supports seeded POI resolution for the current Hangzhou mock trip and optional Gaode Web Service route calls when `AMAP_WEB_SERVICE_KEY` is configured.
+- `lib/server/gaode-route-adapter.ts` supports Gaode Web Service POI search through `place/text` when `AMAP_WEB_SERVICE_KEY` or `GAODE_WEB_SERVICE_KEY` is configured, with seeded/estimated fallback when provider calls fail.
+- The route adapter now covers walking, transit, and driving endpoints so app-owned route modes can map to realistic Web Service calls.
 - Without a Gaode key, route calculation falls back to estimated pending legs. The UI shows `待确认` and keeps the trip saveable.
+- A local process-env key was used to verify Gaode POI search and walking route responses. The key was not written to repo files; `.env.example` contains placeholders only.
 - The result page route panel now shows POI markers, a daily route line, duration, distance, and pending reason; route labels update after point reordering.
-- Full Gaode JS SDK rendering and true provider-confirmed transit duration are intentionally left open until provider keys are available.
+- Full Gaode JS SDK rendering is still intentionally open; the current surface renders normalized provider data in the custom route panel.
+- Recommended provider stack is now recorded: Gaode for China POI/routes, Open-Meteo for Round 12 weather, OpenRouteService for international fallback, Nominatim only for cached low-frequency development geocoding, and Gemini/Ollama behind the replaceable LLM Adapter.

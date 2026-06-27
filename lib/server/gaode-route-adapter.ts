@@ -35,6 +35,27 @@ type GaodeTransitResponse = {
   };
 };
 
+type GaodeDrivingResponse = {
+  status?: string;
+  route?: {
+    paths?: Array<{
+      distance?: string;
+      duration?: string;
+      steps?: Array<{ polyline?: string }>;
+    }>;
+  };
+};
+
+type GaodePoiSearchResponse = {
+  status?: string;
+  pois?: Array<{
+    name?: string;
+    cityname?: string | string[];
+    adname?: string;
+    location?: string;
+  }>;
+};
+
 const routeCache = new Map<string, RouteCalculationResult>();
 
 const seededPois: Record<string, GeoPoint> = {
@@ -52,12 +73,12 @@ const seededPois: Record<string, GeoPoint> = {
 };
 
 export async function calculateRoute(request: RouteCalculationRequest): Promise<RouteCalculationResult> {
-  const cacheKey = createRouteCacheKey(request);
+  const gaodeKey = getGaodeKey();
+  const cacheKey = `${createRouteCacheKey(request)}:${gaodeKey ? "gaode" : "fallback"}:v2`;
   const cached = routeCache.get(cacheKey);
   if (cached) return cached;
 
-  const pois = request.stops.map((stop, index) => resolvePoi(stop, index));
-  const hasKey = Boolean(process.env.AMAP_WEB_SERVICE_KEY);
+  const pois = await Promise.all(request.stops.map((stop, index) => resolvePoi(stop, index, gaodeKey)));
   const legs: NormalizedRouteLeg[] = [];
 
   for (let index = 0; index < pois.length - 1; index += 1) {
@@ -65,8 +86,8 @@ export async function calculateRoute(request: RouteCalculationRequest): Promise<
     const to = pois[index + 1];
     const distance = calculateDistanceMeters(from.location, to.location);
     const mode = inferMode(distance);
-    const leg = hasKey
-      ? await calculateGaodeLeg(from, to, mode, request.city).catch(() => createFallbackLeg(from, to, mode))
+    const leg = gaodeKey
+      ? await calculateGaodeLeg(from, to, mode, request.city, gaodeKey).catch(() => createFallbackLeg(from, to, mode))
       : createFallbackLeg(from, to, mode);
     legs.push(leg);
   }
@@ -102,7 +123,16 @@ export function createRouteCacheKey(request: RouteCalculationRequest) {
   return `${request.tripId}:${request.dayIndex}:${request.city}:${stopsKey}`;
 }
 
-function resolvePoi(stop: RouteCalculationRequest["stops"][number], index: number): NormalizedPoi {
+async function resolvePoi(
+  stop: RouteCalculationRequest["stops"][number],
+  index: number,
+  gaodeKey: string | undefined
+): Promise<NormalizedPoi> {
+  if (gaodeKey) {
+    const gaodePoi = await searchGaodePoi(stop, gaodeKey).catch(() => null);
+    if (gaodePoi) return gaodePoi;
+  }
+
   const seeded = seededPois[stop.name];
   const location = seeded ?? estimateCityPoint(index);
   return {
@@ -114,24 +144,59 @@ function resolvePoi(stop: RouteCalculationRequest["stops"][number], index: numbe
   };
 }
 
+async function searchGaodePoi(
+  stop: RouteCalculationRequest["stops"][number],
+  gaodeKey: string
+): Promise<NormalizedPoi | null> {
+  const url = new URL("https://restapi.amap.com/v3/place/text");
+  url.searchParams.set("keywords", stop.name);
+  url.searchParams.set("city", stop.city);
+  url.searchParams.set("citylimit", "true");
+  url.searchParams.set("offset", "1");
+  url.searchParams.set("page", "1");
+  url.searchParams.set("extensions", "base");
+  url.searchParams.set("key", gaodeKey);
+
+  const response = await fetch(url);
+  const payload = (await response.json()) as GaodePoiSearchResponse;
+  const poi = payload.pois?.[0];
+  const location = parseLocation(poi?.location);
+  if (!response.ok || payload.status !== "1" || !poi || !location) return null;
+
+  return {
+    stopId: stop.id,
+    name: poi.name ?? stop.name,
+    city: normalizeGaodeText(poi.cityname) || stop.city,
+    location,
+    confidence: "gaode"
+  };
+}
+
 async function calculateGaodeLeg(
   from: NormalizedPoi,
   to: NormalizedPoi,
   mode: RouteMode,
-  city: string
+  city: string,
+  gaodeKey: string
 ): Promise<NormalizedRouteLeg> {
   if (mode === "walk") {
-    return calculateWalkingLeg(from, to);
+    return calculateWalkingLeg(from, to, gaodeKey);
   }
-  return calculateTransitLeg(from, to, city);
+  if (mode === "taxi") {
+    return calculateDrivingLeg(from, to, gaodeKey);
+  }
+  return calculateTransitLeg(from, to, city, gaodeKey);
 }
 
-async function calculateWalkingLeg(from: NormalizedPoi, to: NormalizedPoi): Promise<NormalizedRouteLeg> {
-  const key = process.env.AMAP_WEB_SERVICE_KEY;
+async function calculateWalkingLeg(
+  from: NormalizedPoi,
+  to: NormalizedPoi,
+  gaodeKey: string
+): Promise<NormalizedRouteLeg> {
   const url = new URL("https://restapi.amap.com/v3/direction/walking");
   url.searchParams.set("origin", formatPoint(from.location));
   url.searchParams.set("destination", formatPoint(to.location));
-  url.searchParams.set("key", key ?? "");
+  url.searchParams.set("key", gaodeKey);
 
   const response = await fetch(url);
   const payload = (await response.json()) as GaodeWalkingResponse;
@@ -155,13 +220,17 @@ async function calculateWalkingLeg(from: NormalizedPoi, to: NormalizedPoi): Prom
   });
 }
 
-async function calculateTransitLeg(from: NormalizedPoi, to: NormalizedPoi, city: string): Promise<NormalizedRouteLeg> {
-  const key = process.env.AMAP_WEB_SERVICE_KEY;
+async function calculateTransitLeg(
+  from: NormalizedPoi,
+  to: NormalizedPoi,
+  city: string,
+  gaodeKey: string
+): Promise<NormalizedRouteLeg> {
   const url = new URL("https://restapi.amap.com/v3/direction/transit/integrated");
   url.searchParams.set("origin", formatPoint(from.location));
   url.searchParams.set("destination", formatPoint(to.location));
   url.searchParams.set("city", city);
-  url.searchParams.set("key", key ?? "");
+  url.searchParams.set("key", gaodeKey);
 
   const response = await fetch(url);
   const payload = (await response.json()) as GaodeTransitResponse;
@@ -188,6 +257,38 @@ async function calculateTransitLeg(from: NormalizedPoi, to: NormalizedPoi, city:
     distanceMeters,
     polyline,
     note: "高德公交路径已确认。"
+  });
+}
+
+async function calculateDrivingLeg(
+  from: NormalizedPoi,
+  to: NormalizedPoi,
+  gaodeKey: string
+): Promise<NormalizedRouteLeg> {
+  const url = new URL("https://restapi.amap.com/v3/direction/driving");
+  url.searchParams.set("origin", formatPoint(from.location));
+  url.searchParams.set("destination", formatPoint(to.location));
+  url.searchParams.set("key", gaodeKey);
+
+  const response = await fetch(url);
+  const payload = (await response.json()) as GaodeDrivingResponse;
+  const path = payload.route?.paths?.[0];
+  if (!response.ok || payload.status !== "1" || !path) {
+    throw new Error("Gaode driving route failed.");
+  }
+
+  const minutes = secondsToMinutes(path.duration);
+  const distanceMeters = parseNumber(path.distance);
+  return createLeg({
+    from,
+    to,
+    mode: "taxi",
+    provider: "gaode",
+    status: "confirmed",
+    minutes,
+    distanceMeters,
+    polyline: parsePolyline(path.steps?.flatMap((step) => step.polyline ? [step.polyline] : []) ?? []),
+    note: "高德驾车路径已确认。"
   });
 }
 
@@ -286,6 +387,17 @@ function parseNumber(value: string | undefined): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function parseLocation(value: string | undefined): GeoPoint | null {
+  if (!value) return null;
+  const [lng, lat] = value.split(",").map(Number);
+  return Number.isFinite(lng) && Number.isFinite(lat) ? { lng, lat } : null;
+}
+
+function normalizeGaodeText(value: string | string[] | undefined) {
+  if (Array.isArray(value)) return value.find(Boolean) ?? "";
+  return value ?? "";
+}
+
 function secondsToMinutes(value: string | undefined): number | null {
   const seconds = parseNumber(value);
   return seconds === null ? null : Math.max(1, Math.round(seconds / 60));
@@ -306,6 +418,10 @@ function modeLabel(mode: RouteMode) {
   if (mode === "taxi") return "打车";
   if (mode === "transit") return "公交/地铁";
   return "步行/公交";
+}
+
+function getGaodeKey() {
+  return process.env.AMAP_WEB_SERVICE_KEY || process.env.GAODE_WEB_SERVICE_KEY;
 }
 
 function sumNullable(values: Array<number | null>) {

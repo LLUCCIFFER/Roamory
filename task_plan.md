@@ -130,6 +130,8 @@ Complete
 ### Phase 15: Round 10 Route Adapter & Map Panel
 - [x] Add normalized route calculation types.
 - [x] Add server-side Gaode route adapter boundary with in-memory cache.
+- [x] Connect Gaode Web Service POI search through `place/text`.
+- [x] Connect Gaode walking, transit, and driving route calls behind the normalized adapter.
 - [x] Add `POST /api/routes/calculate`.
 - [x] Add pending fallback when Gaode Web Service key is missing or route requests fail.
 - [x] Connect `/trips/[tripId]` to route calculation and route label updates.
@@ -139,8 +141,9 @@ Complete
 - [x] Run typecheck and browser route-panel checks.
 - [x] Create a local git commit for this round.
 - [ ] Push the local commits to GitHub after `github.com:443` connectivity is restored.
-- [ ] Configure Gaode JS SDK key and validate fully confirmed real transit durations.
-- **Status:** partial Round 10 complete; remote push blocked by network; true Gaode SDK/key validation remains
+- [x] Validate Gaode Web Service POI and route calls with a local environment variable key.
+- [ ] Configure Gaode JS SDK key and replace the route-panel mock map with SDK rendering.
+- **Status:** Round 10 Web Service provider complete; remote push blocked by network; Gaode JS SDK rendering remains
 
 ## Key Questions
 1. What is the smallest valuable MVP loop for Roamory?
@@ -173,6 +176,10 @@ Complete
 | Push each completed development round to GitHub with a brief commit summary | The user requested upload after each follow-up update; if GitHub connectivity is unavailable, keep the local commit ready and retry push once the network is restored. |
 | Expose route data through a normalized API instead of raw Gaode fields | Keeps the frontend portable and satisfies the Round 10 privacy/adapter boundary requirement. |
 | Use a pending map panel when Gaode keys are absent | It improves route credibility without pretending unavailable provider data is confirmed. |
+| Use Gaode Web Service as the China POI/route provider | The user provided a Gaode key and confirmed the China-first map stack. |
+| Keep provider keys out of git | `.env.example` documents placeholders; real keys belong in `.env.local` or process environment only. |
+| Use Open-Meteo for Round 12 weather recommendations | It fits the low-cost no-key P1 weekend recommendation scope. |
+| Reserve OpenRouteService, Nominatim, Gemini, and Ollama behind adapters | Keeps international fallback, low-frequency geocoding, and AI provider choices replaceable. |
 
 ## Errors Encountered
 | Error | Attempt | Resolution |

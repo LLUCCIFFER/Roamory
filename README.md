@@ -31,6 +31,22 @@ If port `3000` is already occupied, use another port:
 npm run dev -- --hostname 127.0.0.1 --port 3001
 ```
 
+## Provider Configuration
+
+Copy `.env.example` to `.env.local` for local provider tests. Do not commit real keys.
+
+```bash
+AMAP_WEB_SERVICE_KEY=your-gaode-web-service-key
+```
+
+Current provider direction:
+
+- China POI and routes: Gaode Web Service API as the primary provider.
+- Weather recommendations: Open-Meteo in Round 12.
+- International route/geocoding fallback: reserved OpenRouteService adapter.
+- Low-frequency development geocoding: Nominatim only as a cached fallback, not a production core path.
+- AI trip generation: keep the LLM adapter replaceable; Gemini free tier or local Ollama can be wired next.
+
 ## Current Build
 
 - Reference-image aligned homepage.
@@ -40,7 +56,8 @@ npm run dev -- --hostname 127.0.0.1 --port 3001
 - API-backed generation flow: `/create` -> `/generating` -> `/trips/mock-hangzhou`.
 - TripPlan JSON Schema, mock LLM adapter, schema validation, and repair retry.
 - Route calculation API at `/api/routes/calculate` with a normalized Gaode adapter boundary.
-- Route panel on `/trips/[tripId]` with POI markers, daily route display, cache, reorder recalculation, and pending fallback when Gaode keys are not configured.
+- Gaode Web Service POI search and walking/transit/driving route calls when `AMAP_WEB_SERVICE_KEY` or `GAODE_WEB_SERVICE_KEY` is configured.
+- Route panel on `/trips/[tripId]` with POI markers, daily route display, cache, reorder recalculation, confirmed durations when Gaode is available, and pending fallback when provider calls fail.
 - Public share-link token API with a lightweight `/share/[token]` page.
 - Share poster workflow at `/share-poster/[tripId]` with three fixed-ratio templates.
 - Poster privacy toggles for budget, map, exact location, and exact time.
@@ -52,4 +69,4 @@ npm run dev -- --hostname 127.0.0.1 --port 3001
 - Local footprint space: saving a planned trip lights its destination city.
 - Manual city lighting, city privacy toggle, and `/footprints/[city]` detail pages.
 - Lightweight SVG favicon to avoid missing favicon requests during browser checks.
-- Gaode JS map SDK and fully confirmed real transit durations still require Gaode keys and production provider configuration.
+- Gaode JS map SDK rendering remains a Round 10 follow-up; the current map is a responsive route panel with normalized provider data.

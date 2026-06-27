@@ -492,3 +492,32 @@ Notes:
 - `AMAP_WEB_SERVICE_KEY` is not configured locally, so route results intentionally show `pending` and preserve saveability.
 - Full Gaode JS SDK rendering and confirmed real transit duration verification remain open until provider keys are available.
 - Local commit `560378c feat: add route calibration panel` was created. Push to GitHub was retried, but `github.com:443` still failed with a connection reset.
+
+### Phase 15 Follow-up: Gaode Provider Configuration
+- **Status:** complete
+- **Started:** 2026-06-27
+- Actions taken:
+  - Recorded the provider stack recommended by the user: Gaode for China route/POI, Open-Meteo for weather, OpenRouteService for international fallback, Nominatim for cached low-frequency development geocoding, and Gemini/Ollama behind the LLM adapter.
+  - Added `.env.example` with provider placeholders only; real keys stay in `.env.local` or process environment and are not committed.
+  - Extended `lib/server/gaode-route-adapter.ts` to call Gaode `place/text` for POI search.
+  - Extended the route adapter to handle walking, transit, and driving/taxi route modes.
+  - Updated README, TODO, task plan, and findings with the new provider decisions.
+
+## Test Results - 2026-06-27 Gaode Provider Configuration
+| Test | Input | Expected | Actual | Status |
+|------|-------|----------|--------|--------|
+| TypeScript | `npm run typecheck` | No type errors | Passed | Pass |
+| Gaode POI Web Service | Local process env key, keyword 西湖, city 杭州 | HTTP 200 and POI result | Returned status `1`, first POI `杭州西湖风景名胜区` | Pass |
+| Gaode walking Web Service | Local process env key, two Hangzhou coordinates | HTTP 200 with distance and duration | Returned distance `503` and duration `402` seconds | Pass |
+| App route API with Gaode | `POST /api/routes/calculate` for 西湖 -> 浙江省博物馆 | Normalized confirmed route | Returned `provider: gaode`, `status: confirmed`, Gaode POIs, 74 minutes, 8738 meters | Pass |
+| Route panel visual check | `/trips/mock-hangzhou` on 1440px viewport | Route panel visible, no overflow/errors | Shows `高德已确认`; screenshot updated at `artifacts/route-map-desktop.png` | Pass |
+| Mobile route panel check | `/trips/mock-hangzhou` on 390px viewport | No overflow/errors | Shows `高德已确认` | Pass |
+| Production build | `npm run build` | Build succeeds | Passed | Pass |
+| Security audit | `npm audit --audit-level=moderate` | No moderate+ vulnerabilities | Passed | Pass |
+| Dev preview restart | `http://127.0.0.1:3001/` | HTTP 200 after cache cleanup | Passed | Pass |
+
+Notes:
+- The Gaode key was never written to repo files or shell output as a literal value.
+- `.next` was cleared after production build and the dev server was restarted on `http://127.0.0.1:3001` to avoid mixed build/dev chunks.
+- A local commit was created for this follow-up. `git push -u origin main` still fails from Git with a `github.com:443` timeout, while normal HTTPS probing returns 200; temporary `schannel` mode did not fix it.
+- SSH fallback was checked, but this machine has no GitHub SSH key configured (`Permission denied (publickey)`).

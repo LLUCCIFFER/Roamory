@@ -46,7 +46,7 @@ MVP 主线：
 - [x] 确认账号策略：先游客 + 本地存储。
 - [x] 确认分享策略：同步支持公开链接。
 - [x] 确认 P1 相册策略：允许上传缩略图，原图默认不上传。
-- [ ] 确认 AI 模型供应商和具体模型；业务层先按可替换 LLM Adapter 设计。
+- [x] 确认 AI 接入策略：先保留可替换 LLM Adapter，开发期可接 Gemini free tier 或本地 Ollama，业务层不绑定具体模型。
 - [ ] 确认多端首发顺序：Web/PWA、小程序、React Native/App。
 
 建议默认：
@@ -56,7 +56,7 @@ MVP 主线：
 - [x] 后端：Next.js API Route / NestJS，按项目复杂度选择。
 - [ ] 数据：PostgreSQL + Prisma。
 - [x] 状态：首轮先用 React state + localStorage，后续再接 React Query / Zustand。
-- [ ] 地图：高德 Map/POI/Route Adapter。
+- [x] 地图：高德 Web Service POI/Route Adapter；地图 SDK 渲染保留在第 10 轮后续。
 - [x] AI：LLM Adapter + TripPlan JSON Schema。
 - [x] 本地存储：游客草稿、最近行程、偏好缓存。
 
@@ -230,9 +230,9 @@ frontend-design 使用重点：
 - [x] 实现 `POST /api/trips/generate`。
 - [x] 实现 generationTask 状态。
 - [x] 实现 `GET /api/trips/generate/{id}`。
-- [ ] 接入 POI 检索 mock/真实适配器。
+- [x] 接入 POI 检索 mock/真实适配器。
 - [x] 实现可替换 LLM Adapter。
-- [ ] 接入首个 LLM 服务配置。
+- [ ] 接入首个 LLM 服务配置：Gemini free tier 或本地 Ollama，继续复用当前 LLM Adapter + TripPlan JSON Schema。
 - [x] 对 LLM 输出做 JSON Schema 校验。
 - [x] Schema 校验失败时自动修复重试一次。
 - [x] 失败时返回明确 errorCode。
@@ -345,8 +345,8 @@ frontend-design 使用重点：
 
 - [ ] 接入地图 SDK。
 - [ ] 接入高德地图 SDK。
-- [x] 实现高德 POI Adapter。
-- [x] 实现高德路线 Adapter。
+- [x] 实现高德 Web Service POI Adapter（`place/text`）。
+- [x] 实现高德路线 Adapter（步行、公交/地铁、驾车/打车）。
 - [x] 展示 POI marker。
 - [x] 展示每日路线。
 - [x] 实现 `POST /api/routes/calculate`。
@@ -357,7 +357,7 @@ frontend-design 使用重点：
 验收：
 
 - [x] 行程结果页能显示地图。
-- [ ] 两点之间能返回真实通勤时间。
+- [x] 高德 Web Service 可返回两点之间真实通勤时间；应用 API 在配置 Key 后走 confirmed，失败时降级 pending。
 - [x] 路线失败时显示“待确认”并可保存。
 - [x] 前端不直接依赖高德原始响应字段。
 
@@ -396,11 +396,16 @@ frontend-design 使用重点：
 任务：
 
 - [ ] 实现周末页。
-- [ ] 接入天气 API。
+- [ ] 接入天气 API：优先 Open-Meteo，无 Key、低成本，适合晴天/晚霞/雨后古镇等氛围推荐。
 - [ ] 接入交通半径筛选。
 - [ ] 实现氛围选择：晴天、晚霞、海边、雨后古镇、雪景。
 - [ ] 实现推荐卡片。
 - [ ] 点击推荐可生成一日行程。
+
+技术预留：
+
+- [ ] 国际路线/地理编码 fallback：预留 OpenRouteService adapter，不影响中国场景的高德主链路。
+- [ ] 低频开发地理编码 fallback：Nominatim 只用于缓存后的低频城市/地址搜索，不做生产核心服务或 autocomplete。
 
 验收：
 
