@@ -37,11 +37,14 @@ Copy `.env.example` to `.env.local` for local provider tests. Do not commit real
 
 ```bash
 AMAP_WEB_SERVICE_KEY=your-gaode-web-service-key
+NEXT_PUBLIC_AMAP_JSAPI_KEY=your-gaode-jsapi-key
+NEXT_PUBLIC_AMAP_SECURITY_JS_CODE=your-gaode-jsapi-security-code
 ```
 
 Current provider direction:
 
 - China POI and routes: Gaode Web Service API as the primary provider.
+- Browser map rendering: Gaode JavaScript API 2.0 through `@amap/amap-jsapi-loader`; the app falls back to the watercolor route sketch when JS API config is absent.
 - Weather recommendations: Open-Meteo in Round 12.
 - International route/geocoding fallback: reserved OpenRouteService adapter.
 - Low-frequency development geocoding: Nominatim only as a cached fallback, not a production core path.
@@ -57,7 +60,7 @@ Current provider direction:
 - TripPlan JSON Schema, mock LLM adapter, schema validation, and repair retry.
 - Route calculation API at `/api/routes/calculate` with a normalized Gaode adapter boundary.
 - Gaode Web Service POI search and walking/transit/driving route calls when `AMAP_WEB_SERVICE_KEY` or `GAODE_WEB_SERVICE_KEY` is configured.
-- Route panel on `/trips/[tripId]` with POI markers, daily route display, cache, reorder recalculation, confirmed durations when Gaode is available, and pending fallback when provider calls fail.
+- Route panel on `/trips/[tripId]` with Gaode JS SDK rendering when browser keys are configured, watercolor route fallback when they are absent, POI markers, daily route display, cache, reorder recalculation, confirmed durations when Gaode Web Service is available, and pending fallback when provider calls fail.
 - Public share-link token API with a lightweight `/share/[token]` page.
 - Share poster workflow at `/share-poster/[tripId]` with three fixed-ratio templates.
 - Poster privacy toggles for budget, map, exact location, and exact time.
@@ -69,4 +72,4 @@ Current provider direction:
 - Local footprint space: saving a planned trip lights its destination city.
 - Manual city lighting, city privacy toggle, and `/footprints/[city]` detail pages.
 - Lightweight SVG favicon to avoid missing favicon requests during browser checks.
-- Gaode JS map SDK rendering remains a Round 10 follow-up; the current map is a responsive route panel with normalized provider data.
+- Server Web Service keys and browser JS API keys are kept separate; no real provider key is committed.

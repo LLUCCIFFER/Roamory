@@ -47,6 +47,8 @@
 - Working files: `D:\DEMO\Roamory\task_plan.md`, `D:\DEMO\Roamory\findings.md`, `D:\DEMO\Roamory\progress.md`
 - Gaode route planning docs: `https://lbs.amap.com/api/webservice/guide/api/direction`
 - Gaode route planning 2.0 docs: `https://lbs.amap.com/api/webservice/guide/api/newroute`
+- Gaode JavaScript API loading docs: `https://lbs.amap.com/api/javascript-api-v2/guide/abc/load`
+- Gaode JavaScript API security config docs: `https://lbs.amap.com/api/javascript-api-v2/guide/abc/jscode`
 - Open-Meteo docs: `https://open-meteo.com/`
 - Open-Meteo pricing: `https://open-meteo.com/en/pricing`
 - OpenRouteService plans: `https://staging.openrouteservice.org/plans/`
@@ -95,3 +97,6 @@
 - The result page route panel now shows POI markers, a daily route line, duration, distance, and pending reason; route labels update after point reordering.
 - Full Gaode JS SDK rendering is still intentionally open; the current surface renders normalized provider data in the custom route panel.
 - Recommended provider stack is now recorded: Gaode for China POI/routes, Open-Meteo for Round 12 weather, OpenRouteService for international fallback, Nominatim only for cached low-frequency development geocoding, and Gemini/Ollama behind the replaceable LLM Adapter.
+- Round 10 SDK follow-up adds `@amap/amap-jsapi-loader`, a browser-only Gaode map canvas, marker/polyline rendering, and Scale/ToolBar controls when `NEXT_PUBLIC_AMAP_JSAPI_KEY` is configured.
+- The browser map uses separate `NEXT_PUBLIC_AMAP_JSAPI_KEY` and `NEXT_PUBLIC_AMAP_SECURITY_JS_CODE` values. It must not reuse or expose the server-side `AMAP_WEB_SERVICE_KEY`.
+- Without browser JS API config, or if SDK loading fails, the route panel keeps the watercolor route sketch so the result page remains usable and saveable.

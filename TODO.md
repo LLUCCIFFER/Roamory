@@ -343,8 +343,8 @@ frontend-design 使用重点：
 
 任务：
 
-- [ ] 接入地图 SDK。
-- [ ] 接入高德地图 SDK。
+- [x] 接入地图 SDK 加载边界。
+- [x] 接入高德地图 JS SDK（配置浏览器 Key 后真实渲染，未配置时回退路线草图）。
 - [x] 实现高德 Web Service POI Adapter（`place/text`）。
 - [x] 实现高德路线 Adapter（步行、公交/地铁、驾车/打车）。
 - [x] 展示 POI marker。
@@ -360,6 +360,7 @@ frontend-design 使用重点：
 - [x] 高德 Web Service 可返回两点之间真实通勤时间；应用 API 在配置 Key 后走 confirmed，失败时降级 pending。
 - [x] 路线失败时显示“待确认”并可保存。
 - [x] 前端不直接依赖高德原始响应字段。
+- [ ] 使用正式高德 JS API Key + 安全密钥完成真机域名白名单验证。
 
 ---
 

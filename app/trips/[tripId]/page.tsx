@@ -26,7 +26,7 @@ import {
   Wallet
 } from "lucide-react";
 import Link from "next/link";
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { mockTrip } from "../../../lib/mock-data";
 import {
   readAlbumThumbnail,
@@ -39,6 +39,28 @@ import {
 } from "../../../lib/storage";
 import type { GeoPoint, RouteCalculationResult } from "../../../lib/route-types";
 import type { SavedTrip, SavedTripDay, SavedTripStop } from "../../../lib/storage";
+
+type AMapWindow = Window & {
+  _AMapSecurityConfig?: {
+    securityJsCode: string;
+  };
+};
+
+type AMapMapInstance = {
+  add: (overlays: unknown | unknown[]) => void;
+  addControl?: (control: unknown) => void;
+  destroy: () => void;
+  setFitView?: (overlays?: unknown[], immediately?: boolean, padding?: [number, number, number, number]) => void;
+};
+
+type AMapFactory = {
+  Map: new (container: HTMLElement, options: Record<string, unknown>) => AMapMapInstance;
+  Marker: new (options: Record<string, unknown>) => unknown;
+  Pixel?: new (x: number, y: number) => unknown;
+  Polyline: new (options: Record<string, unknown>) => unknown;
+  Scale?: new (options?: Record<string, unknown>) => unknown;
+  ToolBar?: new (options?: Record<string, unknown>) => unknown;
+};
 
 const replacementStops = [
   {
@@ -741,6 +763,14 @@ function RouteMapPanel({
   const projectedPois = useMemo(() => projectPois(route?.pois.map((poi) => poi.location) ?? []), [route]);
   const totalMinutes = route?.summary.totalMinutes;
   const totalDistance = route?.summary.totalDistanceMeters;
+  const gaodeSdkConfigured = Boolean(process.env.NEXT_PUBLIC_AMAP_JSAPI_KEY);
+  const [sdkState, setSdkState] = useState<"disabled" | "loading" | "ready" | "failed">(
+    gaodeSdkConfigured ? "loading" : "disabled"
+  );
+
+  useEffect(() => {
+    setSdkState(gaodeSdkConfigured && route ? "loading" : "disabled");
+  }, [gaodeSdkConfigured, route?.cacheKey]);
 
   return (
     <div className="route-map-panel">
@@ -754,48 +784,35 @@ function RouteMapPanel({
         </span>
       </div>
 
-      <div className="route-map-stage" aria-label={`${dayTitle} 路线地图`}>
-        <svg className="route-line-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-          {projectedPois.slice(0, -1).map((point, index) => {
-            const nextPoint = projectedPois[index + 1];
-            if (!nextPoint) return null;
-            return (
-              <line
-                key={`${point.x}-${point.y}-${index}`}
-                x1={point.x}
-                x2={nextPoint.x}
-                y1={point.y}
-                y2={nextPoint.y}
-              />
-            );
-          })}
-        </svg>
-        {route?.pois.map((poi, index) => {
-          const point = projectedPois[index] ?? { x: 50, y: 50 };
-          return (
-            <span
-              className="route-marker"
-              key={poi.stopId}
-              style={{
-                left: `${point.x}%`,
-                top: `${point.y}%`
-              }}
-              title={poi.name}
-            >
-              {index + 1}
-            </span>
-          );
-        })}
+      <div
+        className={`route-map-stage ${sdkState === "ready" ? "is-sdk-ready" : ""}`}
+        aria-label={`${dayTitle} 路线地图`}
+      >
+        {route && <RouteSketch projectedPois={projectedPois} route={route} />}
+        {route && gaodeSdkConfigured && (
+          <GaodeSdkCanvas onStatusChange={setSdkState} route={route} />
+        )}
         {!route && (
           <div className="route-map-empty">
             <MapPinned size={28} />
             <span>{loading ? "正在校准路线" : "等待路线数据"}</span>
           </div>
         )}
+        {route && gaodeSdkConfigured && sdkState !== "ready" && (
+          <span className="route-sdk-badge">{sdkState === "failed" ? "地图底图待启用" : "正在加载地图"}</span>
+        )}
       </div>
 
       <div className="route-map-summary">
-        <span>{loading ? "校准中" : route?.status === "confirmed" ? "高德已确认" : "待确认"}</span>
+        <span>
+          {loading
+            ? "校准中"
+            : route?.status === "confirmed"
+              ? sdkState === "ready"
+                ? "高德地图已接入"
+                : "高德已确认"
+              : "待确认"}
+        </span>
         <span>{totalMinutes === null || totalMinutes === undefined ? "时间待确认" : `${totalMinutes} 分钟`}</span>
         <span>{formatDistance(totalDistance)}</span>
       </div>
@@ -804,11 +821,153 @@ function RouteMapPanel({
         <p className="inline-error">{error}</p>
       ) : route?.summary.pendingReason ? (
         <p className="inline-success route-pending-note">{route.summary.pendingReason}</p>
+      ) : sdkState === "ready" ? (
+        <p className="route-confirmed-note">高德地图 SDK 已渲染底图、点位和路线，路线结果仍通过标准化字段进入前端。</p>
+      ) : gaodeSdkConfigured && sdkState === "failed" ? (
+        <p className="route-confirmed-note">地图底图暂不可用，已保留可保存的路线草图和高德通勤结果。</p>
       ) : (
         <p className="route-confirmed-note">路线结果已标准化，前端不读取高德原始字段。</p>
       )}
     </div>
   );
+}
+
+function RouteSketch({
+  projectedPois,
+  route
+}: {
+  projectedPois: Array<{ x: number; y: number }>;
+  route: RouteCalculationResult;
+}) {
+  return (
+    <>
+      <svg className="route-line-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        {projectedPois.slice(0, -1).map((point, index) => {
+          const nextPoint = projectedPois[index + 1];
+          if (!nextPoint) return null;
+          return (
+            <line
+              key={`${point.x}-${point.y}-${index}`}
+              x1={point.x}
+              x2={nextPoint.x}
+              y1={point.y}
+              y2={nextPoint.y}
+            />
+          );
+        })}
+      </svg>
+      {route.pois.map((poi, index) => {
+        const point = projectedPois[index] ?? { x: 50, y: 50 };
+        return (
+          <span
+            className="route-marker"
+            key={poi.stopId}
+            style={{
+              left: `${point.x}%`,
+              top: `${point.y}%`
+            }}
+            title={poi.name}
+          >
+            {index + 1}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
+function GaodeSdkCanvas({
+  onStatusChange,
+  route
+}: {
+  onStatusChange: (status: "disabled" | "loading" | "ready" | "failed") => void;
+  route: RouteCalculationResult;
+}) {
+  const mapRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const key = process.env.NEXT_PUBLIC_AMAP_JSAPI_KEY;
+    const container = mapRef.current;
+    if (!key || !container) {
+      onStatusChange("disabled");
+      return;
+    }
+    const mapKey = key;
+    const mapContainer = container;
+
+    let cancelled = false;
+    let map: AMapMapInstance | null = null;
+
+    async function loadMap() {
+      try {
+        onStatusChange("loading");
+        const securityJsCode = process.env.NEXT_PUBLIC_AMAP_SECURITY_JS_CODE;
+        if (securityJsCode) {
+          (window as AMapWindow)._AMapSecurityConfig = { securityJsCode };
+        }
+
+        const { load } = await import("@amap/amap-jsapi-loader");
+        const AMap = (await load({
+          key: mapKey,
+          version: "2.0",
+          plugins: ["AMap.Scale", "AMap.ToolBar"]
+        })) as AMapFactory;
+
+        if (cancelled) return;
+
+        const center = getRouteCenter(route);
+        map = new AMap.Map(mapContainer, {
+          center: [center.lng, center.lat],
+          mapStyle: "amap://styles/macaron",
+          resizeEnable: true,
+          viewMode: "2D",
+          zoom: route.pois.length > 1 ? 13 : 14
+        });
+
+        const markers = route.pois.map((poi, index) =>
+          new AMap.Marker({
+            anchor: "center",
+            label: {
+              content: `<span class="amap-route-label">${index + 1}</span>`,
+              direction: "center",
+              offset: AMap.Pixel ? new AMap.Pixel(0, 0) : undefined
+            },
+            position: [poi.location.lng, poi.location.lat],
+            title: poi.name
+          })
+        );
+        const path = route.legs.flatMap((leg) => leg.polyline).map((point) => [point.lng, point.lat]);
+        const polyline = path.length >= 2
+          ? new AMap.Polyline({
+              lineJoin: "round",
+              path,
+              showDir: true,
+              strokeColor: "#5a91a5",
+              strokeOpacity: 0.92,
+              strokeWeight: 5
+            })
+          : null;
+        const overlays = polyline ? [...markers, polyline] : markers;
+
+        map.add(overlays);
+        if (AMap.Scale && map.addControl) map.addControl(new AMap.Scale());
+        if (AMap.ToolBar && map.addControl) map.addControl(new AMap.ToolBar({ position: "RB" }));
+        map.setFitView?.(overlays, false, [28, 28, 28, 28]);
+        onStatusChange("ready");
+      } catch {
+        onStatusChange("failed");
+      }
+    }
+
+    void loadMap();
+
+    return () => {
+      cancelled = true;
+      map?.destroy();
+    };
+  }, [onStatusChange, route, route.cacheKey]);
+
+  return <div aria-hidden="true" className="gaode-sdk-canvas" ref={mapRef} />;
 }
 
 function projectPois(points: GeoPoint[]) {
@@ -832,4 +991,13 @@ function formatDistance(value: number | null | undefined) {
   if (value === null || value === undefined) return "距离待确认";
   if (value >= 1000) return `${(value / 1000).toFixed(1)} km`;
   return `${value} m`;
+}
+
+function getRouteCenter(route: RouteCalculationResult): GeoPoint {
+  const points = route.pois.map((poi) => poi.location);
+  if (points.length === 0) return { lng: 120.1432, lat: 30.2592 };
+  return {
+    lng: points.reduce((sum, point) => sum + point.lng, 0) / points.length,
+    lat: points.reduce((sum, point) => sum + point.lat, 0) / points.length
+  };
 }

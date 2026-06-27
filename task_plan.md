@@ -142,8 +142,10 @@ Complete
 - [x] Create a local git commit for this round.
 - [ ] Push the local commits to GitHub after `github.com:443` connectivity is restored.
 - [x] Validate Gaode Web Service POI and route calls with a local environment variable key.
-- [ ] Configure Gaode JS SDK key and replace the route-panel mock map with SDK rendering.
-- **Status:** Round 10 Web Service provider complete; remote push blocked by network; Gaode JS SDK rendering remains
+- [x] Add Gaode JS SDK loader boundary and browser map canvas.
+- [x] Keep the watercolor route sketch as fallback when browser JS API config is absent or SDK loading fails.
+- [ ] Validate production Gaode JS API key, security code, and domain whitelist on the final deployment domain.
+- **Status:** Round 10 SDK boundary complete; production JS API domain validation remains
 
 ## Key Questions
 1. What is the smallest valuable MVP loop for Roamory?
@@ -180,6 +182,7 @@ Complete
 | Keep provider keys out of git | `.env.example` documents placeholders; real keys belong in `.env.local` or process environment only. |
 | Use Open-Meteo for Round 12 weather recommendations | It fits the low-cost no-key P1 weekend recommendation scope. |
 | Reserve OpenRouteService, Nominatim, Gemini, and Ollama behind adapters | Keeps international fallback, low-frequency geocoding, and AI provider choices replaceable. |
+| Separate Gaode Web Service keys from browser JS API keys | Server routes use `AMAP_WEB_SERVICE_KEY`; browser map rendering uses `NEXT_PUBLIC_AMAP_JSAPI_KEY` and can safely fall back when absent. |
 
 ## Errors Encountered
 | Error | Attempt | Resolution |

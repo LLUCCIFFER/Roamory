@@ -521,3 +521,28 @@ Notes:
 - `.next` was cleared after production build and the dev server was restarted on `http://127.0.0.1:3001` to avoid mixed build/dev chunks.
 - A local commit was created for this follow-up. `git push -u origin main` still fails from Git with a `github.com:443` timeout, while normal HTTPS probing returns 200; temporary `schannel` mode did not fix it.
 - SSH fallback was checked, but this machine has no GitHub SSH key configured (`Permission denied (publickey)`).
+
+### Phase 15 Follow-up: Gaode JS SDK Map Renderer
+- **Status:** complete
+- **Started:** 2026-06-27
+- Actions taken:
+  - Added `@amap/amap-jsapi-loader` for browser-side Gaode JavaScript API loading.
+  - Added a `GaodeSdkCanvas` route renderer on `/trips/[tripId]` that loads Gaode JS API 2.0, renders route markers, route polyline, Scale, and ToolBar when browser map keys are configured.
+  - Kept the existing watercolor route sketch as the default fallback when browser JS API keys are absent or SDK loading fails.
+  - Added separate browser env placeholders: `NEXT_PUBLIC_AMAP_JSAPI_KEY` and `NEXT_PUBLIC_AMAP_SECURITY_JS_CODE`.
+  - Updated README, TODO, task plan, and findings to separate server Web Service keys from browser JS API keys.
+
+## Test Results - 2026-06-27 Gaode JS SDK Map Renderer
+| Test | Input | Expected | Actual | Status |
+|------|-------|----------|--------|--------|
+| TypeScript | `npm run typecheck` | No type errors | Passed after tightening env/ref narrowing | Pass |
+| Desktop fallback map | `/trips/mock-hangzhou`, no browser JS API key | Watercolor route sketch remains visible | `高德已确认`, 2 sketch route lines, no SDK canvas, no overflow/errors | Pass |
+| Mobile fallback map | `/trips/mock-hangzhou`, 390px viewport | No overflow/errors | `高德已确认`, no overflow/errors | Pass |
+| Production build | `npm run build` | Build succeeds with SDK loader dependency | Passed | Pass |
+| Security audit | `npm audit --audit-level=moderate` | No moderate+ vulnerabilities | Passed | Pass |
+| Dev preview restart | `http://127.0.0.1:3001/` | HTTP 200 after cache cleanup | Passed | Pass |
+| Post-restart route smoke | `/trips/mock-hangzhou` | Route panel still works | `高德已确认`, no overflow/errors; screenshot refreshed at `artifacts/route-map-desktop.png` | Pass |
+
+Notes:
+- Formal Gaode JS API rendering still needs a Web JS API key, security code, and final domain whitelist. The implementation falls back cleanly without those values.
+- `@amap/amap-jsapi-loader` increased `/trips/[tripId]` first-load size from about 117 kB to 118 kB in the production build.
