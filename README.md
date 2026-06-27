@@ -16,6 +16,8 @@ Roamory is a multi-end travel planning prototype. The first runnable surface is 
 
 ![Privacy and data settings](artifacts/settings-desktop.png)
 
+![Photo memory workbench](artifacts/memories-desktop.png)
+
 ## Run
 
 ```bash
@@ -66,6 +68,9 @@ Current provider direction:
 - Poster privacy toggles for budget, map, exact location, and exact time.
 - Local PNG poster export and closeable public share links.
 - Account, preference, privacy, and local data management at `/settings`.
+- Photo memory workbench at `/memories` with local thumbnail import, file metadata clustering, candidate trips, merge/split, ignore, delete, and confirmation controls.
+- Confirmed photo memories generate local trips, save a cover thumbnail, and light the related footprint city.
+- Original image backup stays off by default; Round 11 only stores local thumbnails and file metadata.
 - Guest save prompt for account binding without blocking local storage.
 - Trip, Footprint, and SharePoster deletion from local data management.
 - Editable itinerary result page with local save-to-planned persistence.

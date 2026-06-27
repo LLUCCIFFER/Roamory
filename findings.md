@@ -100,3 +100,6 @@
 - Round 10 SDK follow-up adds `@amap/amap-jsapi-loader`, a browser-only Gaode map canvas, marker/polyline rendering, and Scale/ToolBar controls when `NEXT_PUBLIC_AMAP_JSAPI_KEY` is configured.
 - The browser map uses separate `NEXT_PUBLIC_AMAP_JSAPI_KEY` and `NEXT_PUBLIC_AMAP_SECURITY_JS_CODE` values. It must not reuse or expose the server-side `AMAP_WEB_SERVICE_KEY`.
 - Without browser JS API config, or if SDK loading fails, the route panel keeps the watercolor route sketch so the result page remains usable and saveable.
+- Round 11 photo memory is implemented as a local-first workbench at `/memories`: imported image files are resized into local thumbnails, file metadata is used for candidate clustering, and original images are not persisted.
+- Photo memory candidates support confirm, ignore, delete, merge, and split. Confirming a candidate creates a local planned Trip, stores its cover thumbnail, and lights the related footprint city.
+- True OS photo-library authorization, EXIF GPS parsing, server-side clustering, and original-image cloud backup remain platform/sync-stage work.

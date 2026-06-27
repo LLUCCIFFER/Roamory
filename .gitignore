@@ -13,6 +13,7 @@ artifacts/*
 !artifacts/footprint-home-desktop.png
 !artifacts/share-poster-desktop.png
 !artifacts/settings-desktop.png
+!artifacts/memories-desktop.png
 tsconfig.tsbuildinfo
 .env
 .env.local

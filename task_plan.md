@@ -147,6 +147,20 @@ Complete
 - [ ] Validate production Gaode JS API key, security code, and domain whitelist on the final deployment domain.
 - **Status:** Round 10 SDK boundary complete; production JS API domain validation remains
 
+### Phase 16: Round 11 Photo Memory Workbench
+- [x] Add local photo-memory candidate data model and storage helpers.
+- [x] Add `/memories` workbench with album authorization/privacy copy.
+- [x] Support thumbnail import with local file metadata and compressed previews.
+- [x] Keep original-image backup off by default with a separate confirmation toggle.
+- [x] Add local clustering into candidate trips.
+- [x] Support confirm, ignore, merge, split, and delete candidate actions.
+- [x] Generate a local Trip from a confirmed photo memory.
+- [x] Light the related footprint city after confirmation.
+- [x] Link the workbench from homepage navigation and Mine panel.
+- [x] Run browser regression checks and production verification.
+- [x] Create and push a local git commit for this round.
+- **Status:** complete
+
 ## Key Questions
 1. What is the smallest valuable MVP loop for Roamory?
 2. Which features should be P0, P1, and P2 to avoid scope creep?
@@ -183,6 +197,7 @@ Complete
 | Use Open-Meteo for Round 12 weather recommendations | It fits the low-cost no-key P1 weekend recommendation scope. |
 | Reserve OpenRouteService, Nominatim, Gemini, and Ollama behind adapters | Keeps international fallback, low-frequency geocoding, and AI provider choices replaceable. |
 | Separate Gaode Web Service keys from browser JS API keys | Server routes use `AMAP_WEB_SERVICE_KEY`; browser map rendering uses `NEXT_PUBLIC_AMAP_JSAPI_KEY` and can safely fall back when absent. |
+| Build photo memory as local-first thumbnail workflow | It satisfies P1 privacy constraints before platform photo-library integrations or server clustering are introduced. |
 
 ## Errors Encountered
 | Error | Attempt | Resolution |

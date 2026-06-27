@@ -546,3 +546,26 @@ Notes:
 Notes:
 - Formal Gaode JS API rendering still needs a Web JS API key, security code, and final domain whitelist. The implementation falls back cleanly without those values.
 - `@amap/amap-jsapi-loader` increased `/trips/[tripId]` first-load size from about 117 kB to 118 kB in the production build.
+
+### Phase 16: Round 11 Photo Memory Workbench
+- **Status:** complete
+- **Started:** 2026-06-27
+- Actions taken:
+  - Added `PhotoMemoryCandidate` and thumbnail metadata storage helpers in `lib/storage.ts`.
+  - Added `/memories` with local album privacy status, city selection, thumbnail import, sample photo pack, original-backup toggle, and candidate stats.
+  - Implemented local thumbnail resizing through canvas before storing data URLs.
+  - Implemented candidate confirm, ignore, delete, merge, and split actions.
+  - Confirming a candidate creates a local planned Trip, saves the cover thumbnail, and lights the footprint city.
+  - Added homepage bottom-tab and Mine-panel links to the memory workbench.
+  - Captured a production-server demo screenshot for the README at `artifacts/memories-desktop.png`.
+  - Updated TODO, task plan, and findings for Round 11.
+
+## Test Results - 2026-06-27 Photo Memory Workbench
+| Test | Input | Expected | Actual | Status |
+|------|-------|----------|--------|--------|
+| TypeScript | `npm run typecheck` | No type errors | Passed | Pass |
+| Production build | `npm run build` | `/memories` compiles with existing routes | Passed; `/memories` first-load JS about 115 kB | Pass |
+| Security audit | `npm audit --audit-level=moderate` | No moderate+ vulnerabilities | Passed | Pass |
+| Photo memory desktop flow | Upload in-memory SVG, add sample pack, split, merge, confirm | Candidate trip becomes confirmed, Trip is created, footprint is lit, cover thumbnail saved | 3 candidates, 1 confirmed, 1 trip, 1 footprint, 1 album thumbnail key | Pass |
+| Desktop visual check | 1440px production screenshot | No console errors or horizontal overflow | Passed; screenshot updated at `artifacts/memories-desktop.png` | Pass |
+| Mobile visual check | 390px production screenshot | No console errors or horizontal overflow | Passed; screenshot captured locally | Pass |

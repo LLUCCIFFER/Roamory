@@ -11,6 +11,7 @@ import {
   Eye,
   EyeOff,
   Heart,
+  ImagePlus,
   LockKeyhole,
   Map,
   MapPinned,
@@ -285,6 +286,10 @@ export default function Home() {
         <button className={activeTab === "footprint" ? "active" : ""} onClick={() => setActiveTab("footprint")}>
           <MapPinned size={18} />
           足迹
+        </button>
+        <button onClick={() => router.push("/memories")}>
+          <ImagePlus size={18} />
+          记忆
         </button>
         <button className={activeTab === "mine" ? "active" : ""} onClick={() => setActiveTab("mine")}>
           <UserRound size={18} />
@@ -597,6 +602,10 @@ function MinePanel({
       <Link className="secondary-action action-link" href="/settings?panel=account&login=1">
         <Plus size={16} />
         绑定账号
+      </Link>
+      <Link className="secondary-action action-link" href="/memories">
+        <ImagePlus size={16} />
+        打开相册记忆
       </Link>
     </section>
   );

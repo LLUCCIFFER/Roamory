@@ -87,6 +87,32 @@ export type FootprintCity = {
   note?: string;
 };
 
+export type PhotoMemoryStatus = "candidate" | "confirmed" | "ignored";
+
+export type PhotoMemoryThumbnail = {
+  id: string;
+  name: string;
+  dataUrl: string;
+  capturedAt: string;
+  size: number;
+  type: string;
+};
+
+export type PhotoMemoryCandidate = {
+  id: string;
+  status: PhotoMemoryStatus;
+  title: string;
+  city: string;
+  startDate: string;
+  endDate: string;
+  photoCount: number;
+  confidence: number;
+  thumbnails: PhotoMemoryThumbnail[];
+  tripId?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type SharePosterTemplate = "diary" | "route" | "memory";
 
 export type SharePosterPrivacy = {
@@ -135,6 +161,7 @@ export const guestDraftStorageKey = "roamory.guestDraft";
 export const generationTaskStorageKey = "roamory.generationTask";
 export const savedTripsStorageKey = "roamory.savedTrips";
 export const footprintsStorageKey = "roamory.footprints";
+export const photoMemoryCandidatesStorageKey = "roamory.photoMemoryCandidates";
 export const userProfileStorageKey = "roamory.userProfile";
 export const preferenceSettingsStorageKey = "roamory.preferenceSettings";
 export const privacySettingsStorageKey = "roamory.privacySettings";
@@ -204,6 +231,63 @@ export function readAlbumThumbnail(tripId: string): string | null {
 
 export function deleteAlbumThumbnail(tripId: string) {
   window.localStorage.removeItem(albumThumbnailStorageKey(tripId));
+}
+
+function sortPhotoMemoryCandidates(candidates: PhotoMemoryCandidate[]) {
+  return [...candidates].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}
+
+export function readPhotoMemoryCandidates(): PhotoMemoryCandidate[] {
+  const saved = window.localStorage.getItem(photoMemoryCandidatesStorageKey);
+  if (!saved) return [];
+  try {
+    const parsed = JSON.parse(saved) as PhotoMemoryCandidate[];
+    return Array.isArray(parsed)
+      ? sortPhotoMemoryCandidates(parsed.filter((candidate) => candidate.id && candidate.city))
+      : [];
+  } catch {
+    window.localStorage.removeItem(photoMemoryCandidatesStorageKey);
+    return [];
+  }
+}
+
+export function savePhotoMemoryCandidates(candidates: PhotoMemoryCandidate[]) {
+  window.localStorage.setItem(photoMemoryCandidatesStorageKey, JSON.stringify(sortPhotoMemoryCandidates(candidates)));
+}
+
+export function upsertPhotoMemoryCandidate(candidate: PhotoMemoryCandidate) {
+  const candidates = readPhotoMemoryCandidates();
+  savePhotoMemoryCandidates([
+    {
+      ...candidate,
+      thumbnails: candidate.thumbnails.slice(0, 8)
+    },
+    ...candidates.filter((item) => item.id !== candidate.id)
+  ]);
+}
+
+export function updatePhotoMemoryCandidateStatus(
+  candidateId: string,
+  status: PhotoMemoryStatus,
+  tripId?: string
+) {
+  const candidates = readPhotoMemoryCandidates();
+  savePhotoMemoryCandidates(
+    candidates.map((candidate) =>
+      candidate.id === candidateId
+        ? {
+            ...candidate,
+            status,
+            tripId: tripId ?? candidate.tripId,
+            updatedAt: new Date().toISOString()
+          }
+        : candidate
+    )
+  );
+}
+
+export function deletePhotoMemoryCandidate(candidateId: string) {
+  savePhotoMemoryCandidates(readPhotoMemoryCandidates().filter((candidate) => candidate.id !== candidateId));
 }
 
 export function defaultPreferenceSettings(): PreferenceSettings {
