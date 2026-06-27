@@ -2668,6 +2668,328 @@ textarea:focus {
   top: 14px;
 }
 
+.souvenir-page {
+  display: grid;
+  gap: 18px;
+  padding-bottom: 86px;
+}
+
+.souvenir-hero,
+.souvenir-layout,
+.souvenir-grid {
+  position: relative;
+  z-index: 1;
+  width: min(1120px, 100%);
+  margin-inline: auto;
+}
+
+.souvenir-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.38fr);
+  gap: 18px;
+  align-items: end;
+  border-radius: 8px;
+  padding: 28px;
+}
+
+.souvenir-hero h1 {
+  margin-bottom: 10px;
+  color: var(--lake-ink);
+  font-size: clamp(42px, 7vw, 78px);
+  line-height: 0.98;
+}
+
+.souvenir-hero p {
+  max-width: 680px;
+  margin-bottom: 0;
+  color: var(--lake-ink);
+  line-height: 1.65;
+}
+
+.souvenir-hero-stats {
+  display: grid;
+  gap: 9px;
+}
+
+.souvenir-hero-stats span,
+.annual-report-grid span,
+.annual-report-tags span,
+.souvenir-tag-row small {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--lake-ink);
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.souvenir-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.78fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.souvenir-editor,
+.souvenir-preview-panel,
+.souvenir-empty,
+.souvenir-list-card,
+.city-souvenir-panel {
+  border-radius: 8px;
+  padding: 22px;
+}
+
+.souvenir-editor {
+  position: sticky;
+  top: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.souvenir-editor label,
+.settings-modal label {
+  display: grid;
+  gap: 7px;
+}
+
+.souvenir-editor label > span,
+.settings-modal label > span {
+  color: var(--lake-ink);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.souvenir-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.souvenir-editor input,
+.souvenir-editor textarea,
+.souvenir-editor select {
+  width: 100%;
+}
+
+.souvenir-mode-row,
+.souvenir-upload-row,
+.souvenir-card-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.souvenir-mode-row button {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid rgba(79, 116, 132, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--lake-ink);
+  font-weight: 900;
+}
+
+.souvenir-mode-row button.active {
+  border-color: rgba(125, 201, 230, 0.72);
+  background: var(--sea-glass);
+  color: white;
+}
+
+.souvenir-upload-action {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.souvenir-upload-action input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.souvenir-message {
+  margin-bottom: 0;
+}
+
+.souvenir-preview-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.souvenir-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(140px, 0.42fr) minmax(0, 1fr);
+  gap: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(79, 116, 132, 0.14);
+  border-radius: 8px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.86), rgba(217, 241, 251, 0.7)),
+    repeating-linear-gradient(135deg, rgba(125, 201, 230, 0.16) 0 1px, transparent 1px 18px);
+  padding: 14px;
+}
+
+.souvenir-card-layered::before,
+.souvenir-card-layered::after {
+  position: absolute;
+  content: "";
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.42);
+  box-shadow: 0 18px 32px rgba(67, 119, 145, 0.12);
+}
+
+.souvenir-card-layered::before {
+  inset: 22px 28px auto auto;
+  width: 34%;
+  height: 42%;
+  transform: rotate(5deg);
+}
+
+.souvenir-card-layered::after {
+  inset: auto auto 18px 30px;
+  width: 30%;
+  height: 34%;
+  transform: rotate(-7deg);
+}
+
+.souvenir-image-frame {
+  position: relative;
+  z-index: 1;
+  min-height: 170px;
+  overflow: hidden;
+  border: 8px solid rgba(255, 255, 255, 0.82);
+  border-radius: 8px;
+  background: rgba(217, 241, 251, 0.86);
+  box-shadow: 0 20px 40px rgba(67, 119, 145, 0.14);
+}
+
+.souvenir-image-frame img,
+.souvenir-image-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 170px;
+  object-fit: cover;
+}
+
+.souvenir-image-placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--lake-ink);
+}
+
+.souvenir-card-copy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 9px;
+  align-content: start;
+}
+
+.souvenir-card-copy > span,
+.souvenir-card-copy time {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--lake-ink);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.souvenir-card-copy h2 {
+  margin-bottom: 0;
+  color: var(--deep-ink);
+  font-size: clamp(24px, 4vw, 36px);
+  line-height: 1.08;
+}
+
+.souvenir-card-copy p {
+  margin-bottom: 0;
+  color: var(--lake-ink);
+  line-height: 1.55;
+}
+
+.souvenir-tag-row,
+.annual-report-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.annual-report-panel {
+  display: grid;
+  gap: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.56);
+  padding: 16px;
+}
+
+.annual-report-panel h3 {
+  margin: 0;
+  color: var(--deep-ink);
+}
+
+.annual-report-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.annual-report-panel .secondary-action {
+  width: auto;
+  justify-self: start;
+}
+
+.souvenir-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.souvenir-empty {
+  grid-column: 1 / -1;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  color: var(--lake-ink);
+  text-align: center;
+}
+
+.souvenir-empty h2 {
+  margin-bottom: 0;
+  color: var(--deep-ink);
+}
+
+.souvenir-empty p {
+  max-width: 520px;
+  margin-bottom: 0;
+  line-height: 1.65;
+}
+
+.souvenir-list-card {
+  display: grid;
+  gap: 12px;
+}
+
+.souvenir-card-actions {
+  grid-template-columns: minmax(150px, 1fr) minmax(112px, auto) 42px;
+  align-items: center;
+}
+
+.souvenir-card-actions .primary-action,
+.souvenir-card-actions .secondary-action {
+  min-height: 40px;
+  padding: 0 13px;
+  font-size: 12px;
+}
+
 .city-detail-shell {
   padding-bottom: 86px;
 }
@@ -2788,11 +3110,13 @@ textarea:focus {
   font-size: 18px;
 }
 
-.linked-trip-panel .section-title {
+.linked-trip-panel .section-title,
+.city-souvenir-panel .section-title {
   margin-bottom: 14px;
 }
 
-.linked-trip-list {
+.linked-trip-list,
+.city-souvenir-list {
   display: grid;
   gap: 10px;
 }
@@ -2816,6 +3140,58 @@ textarea:focus {
   display: inline-flex;
   align-items: center;
   gap: 7px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.city-souvenir-panel {
+  grid-column: 1 / -1;
+}
+
+.city-souvenir-list {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.city-souvenir-item {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  border: 1px solid rgba(79, 116, 132, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--lake-ink);
+  padding: 10px;
+  text-decoration: none;
+}
+
+.city-souvenir-item img,
+.city-souvenir-item > svg {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  background: rgba(217, 241, 251, 0.78);
+  object-fit: cover;
+}
+
+.city-souvenir-item > svg {
+  padding: 18px;
+}
+
+.city-souvenir-item strong,
+.city-souvenir-item span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.city-souvenir-item strong {
+  color: var(--deep-ink);
+}
+
+.city-souvenir-item span {
+  margin-top: 4px;
   font-size: 12px;
   font-weight: 900;
 }
@@ -3383,10 +3759,14 @@ textarea:focus {
   .poster-layout,
   .settings-hero,
   .settings-layout,
+  .souvenir-hero,
+  .souvenir-layout,
+  .souvenir-grid,
   .weekend-hero,
   .weekend-layout,
   .city-hero,
   .city-detail-layout,
+  .city-souvenir-list,
   .footprint-overview,
   .public-day-grid,
   .result-layout {
@@ -3399,6 +3779,7 @@ textarea:focus {
   .trip-title-block h1,
   .poster-hero h1,
   .settings-hero h1,
+  .souvenir-hero h1,
   .city-hero h1,
   .public-share-card h1 {
     font-size: 3rem;
@@ -3416,7 +3797,8 @@ textarea:focus {
     font-size: 2rem;
   }
 
-  .create-aside {
+  .create-aside,
+  .souvenir-editor {
     position: static;
   }
 
@@ -3477,6 +3859,7 @@ textarea:focus {
   .trip-title-block h1,
   .poster-hero h1,
   .settings-hero h1,
+  .souvenir-hero h1,
   .city-hero h1,
   .public-share-card h1 {
     font-size: 2.2rem;
@@ -3512,6 +3895,11 @@ textarea:focus {
   .poster-hero,
   .poster-preview-panel,
   .poster-control-card,
+  .souvenir-hero,
+  .souvenir-editor,
+  .souvenir-preview-panel,
+  .souvenir-empty,
+  .souvenir-list-card,
   .weekend-hero,
   .weekend-controls,
   .recommendation-card,
@@ -3531,6 +3919,12 @@ textarea:focus {
 
   .guest-link-prompt,
   .settings-form-grid,
+  .souvenir-form-grid,
+  .souvenir-mode-row,
+  .souvenir-upload-row,
+  .souvenir-card,
+  .souvenir-card-actions,
+  .annual-report-grid,
   .mood-grid,
   .weekend-filter-grid,
   .weather-warning,
@@ -3541,6 +3935,10 @@ textarea:focus {
   .settings-action-row .primary-action,
   .settings-action-row .secondary-action,
   .settings-save,
+  .souvenir-upload-row .primary-action,
+  .souvenir-upload-row .secondary-action,
+  .souvenir-card-actions .primary-action,
+  .souvenir-card-actions .secondary-action,
   .danger-action {
     width: 100%;
   }
@@ -3577,6 +3975,7 @@ textarea:focus {
   .city-hero,
   .city-memory-map,
   .linked-trip-panel,
+  .city-souvenir-panel,
   .city-empty-state,
   .memory-hero,
   .memory-privacy-panel,
@@ -3588,6 +3987,7 @@ textarea:focus {
   .footprint-map,
   .city-memory-map,
   .city-stat-grid,
+  .city-souvenir-list,
   .route-map-summary,
   .memory-hero,
   .memory-workbench,

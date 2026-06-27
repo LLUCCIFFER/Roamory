@@ -106,3 +106,9 @@
 - Round 12 weather recommendations are implemented at `/weekend` and `/api/weather/recommendations`: Open-Meteo daily forecast is normalized into Roamory cards for sunny, sunset, seaside, rainy-town, and snow moods.
 - Weather recommendations include weather evidence, city-to-city travel-radius estimates, risk tips, in-memory weather cache fallback, and local fallback recommendations if Open-Meteo is unavailable.
 - Round 12 transport time is still an app-owned estimate, not a confirmed Gaode intercity route. Replace the estimate behind the recommendation adapter when city-to-city route provider work starts.
+- Round 13 souvenirs are implemented local-first at `/souvenirs`: uploaded or camera-selected images are resized into local thumbnails, original images are not uploaded, and cards can be associated with a city and optional saved Trip.
+- Souvenir cards support a plain card and a 2.5D layered display mode. This validates the emotional object workflow before introducing true background cutout, 3D reconstruction, or commerce fulfillment.
+- Souvenir sharing generates a local `data:image/png` card through canvas and stores it on the souvenir record as `shareImageDataUrl`.
+- Saving a souvenir lights the related city footprint, and `/footprints/[city]` now shows same-city souvenirs even when that city has no saved Trip yet.
+- `buildAnnualReportSeed()` now creates a local annual-report data foundation from saved trips, footprints, souvenirs, photo memories, top cities, and tags.
+- `/settings` local data management now counts and deletes souvenir records alongside Trips, Footprints, and SharePoster drafts.

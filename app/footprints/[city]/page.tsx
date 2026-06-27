@@ -1,15 +1,16 @@
 "use client";
 
-import { ArrowLeft, CalendarDays, Eye, EyeOff, MapPinned, Route } from "lucide-react";
+import { ArrowLeft, CalendarDays, Eye, EyeOff, MapPinned, PackageOpen, Route } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   readFootprintCity,
   readSavedTrips,
+  readSouvenirsByCity,
   toggleFootprintPrivacy
 } from "../../../lib/storage";
-import type { FootprintCity, SavedTrip } from "../../../lib/storage";
+import type { FootprintCity, SavedTrip, SouvenirMemory } from "../../../lib/storage";
 
 function decodeCityParam(value: string | string[] | undefined) {
   const rawValue = Array.isArray(value) ? value[0] : value;
@@ -41,6 +42,7 @@ export default function FootprintCityPage() {
   const city = useMemo(() => decodeCityParam(params.city), [params.city]);
   const [footprint, setFootprint] = useState<FootprintCity | null>(null);
   const [linkedTrips, setLinkedTrips] = useState<SavedTrip[]>([]);
+  const [citySouvenirs, setCitySouvenirs] = useState<SouvenirMemory[]>([]);
 
   useEffect(() => {
     const currentFootprint = readFootprintCity(city);
@@ -49,6 +51,7 @@ export default function FootprintCityPage() {
     );
     setFootprint(currentFootprint);
     setLinkedTrips(trips);
+    setCitySouvenirs(readSouvenirsByCity(city));
   }, [city]);
 
   function handleTogglePrivacy() {
@@ -56,6 +59,9 @@ export default function FootprintCityPage() {
     const nextFootprint = toggleFootprintPrivacy(footprint.city);
     if (nextFootprint) setFootprint(nextFootprint);
   }
+
+  const hasCityMemory = Boolean(footprint) || citySouvenirs.length > 0;
+  const displayCity = footprint?.city || city;
 
   return (
     <main className="app-shell subpage-shell city-detail-shell">
@@ -79,8 +85,8 @@ export default function FootprintCityPage() {
           <p className="eyebrow">Virtual Space</p>
           <h1>{city || "城市"} 记忆空间</h1>
           <p>
-            {footprint
-              ? "这里汇总本地保存过的行程和手动点亮记录。"
+            {hasCityMemory
+              ? "这里汇总本地保存过的行程、手动点亮记录和纪念品。"
               : "这个城市还没有被点亮，回到首页足迹空间后可以手动点亮。"}
           </p>
         </div>
@@ -92,18 +98,18 @@ export default function FootprintCityPage() {
         )}
       </section>
 
-      {footprint ? (
+      {hasCityMemory ? (
         <section className="city-detail-layout">
           <article className="city-memory-map glass-card">
             <MapPinned size={34} />
             <div>
               <span className="footprint-pin large" />
-              <h2>{footprint.city}</h2>
-              <p>{footprint.note || "这座城市已进入你的本地旅行日记。"}</p>
+              <h2>{displayCity}</h2>
+              <p>{footprint?.note || "这座城市已进入你的本地旅行日记。"}</p>
             </div>
             <div className="city-stat-grid">
               <span>
-                <strong>{footprint.visitCount}</strong>
+                <strong>{footprint?.visitCount ?? 0}</strong>
                 次点亮
               </span>
               <span>
@@ -111,7 +117,7 @@ export default function FootprintCityPage() {
                 条行程
               </span>
               <span>
-                <strong>{formatDate(footprint.lastVisitedAt)}</strong>
+                <strong>{formatDate(footprint?.lastVisitedAt ?? citySouvenirs[0]?.capturedAt)}</strong>
                 最近到访
               </span>
             </div>
@@ -140,6 +146,35 @@ export default function FootprintCityPage() {
                       <Route size={15} />
                       {trip.days.reduce((count, day) => count + day.stops.length, 0)} 个点位
                     </span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </aside>
+
+          <aside className="city-souvenir-panel glass-card">
+            <div className="section-title">
+              <div>
+                <p>Souvenirs</p>
+                <h2>城市纪念品</h2>
+              </div>
+              <span>{citySouvenirs.length}</span>
+            </div>
+            {citySouvenirs.length === 0 ? (
+              <p className="city-empty-copy">还没有挂到这个城市的纪念品。</p>
+            ) : (
+              <div className="city-souvenir-list">
+                {citySouvenirs.map((souvenir) => (
+                  <Link className="city-souvenir-item" href="/souvenirs" key={souvenir.id}>
+                    {souvenir.imageDataUrl ? (
+                      <img src={souvenir.imageDataUrl} alt="" />
+                    ) : (
+                      <PackageOpen size={24} />
+                    )}
+                    <div>
+                      <strong>{souvenir.title}</strong>
+                      <span>{souvenir.tags.slice(0, 3).join(" / ") || "纪念品"}</span>
+                    </div>
                   </Link>
                 ))}
               </div>

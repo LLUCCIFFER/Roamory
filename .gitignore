@@ -15,6 +15,7 @@ artifacts/*
 !artifacts/settings-desktop.png
 !artifacts/memories-desktop.png
 !artifacts/weekend-desktop.png
+!artifacts/souvenirs-desktop.png
 tsconfig.tsbuildinfo
 .env
 .env.local

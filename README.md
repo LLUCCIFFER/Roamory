@@ -20,6 +20,8 @@ Roamory is a multi-end travel planning prototype. The first runnable surface is 
 
 ![Weekend weather recommendations](artifacts/weekend-desktop.png)
 
+![Souvenir memory workbench](artifacts/souvenirs-desktop.png)
+
 ## Run
 
 ```bash
@@ -75,6 +77,8 @@ Current provider direction:
 - Original image backup stays off by default; Round 11 only stores local thumbnails and file metadata.
 - Weekend weather recommendations at `/weekend` with Open-Meteo daily forecasts, mood selection, public-transport/driving radius filters, evidence chips, risk tips, cache/fallback handling, and one-day trip generation.
 - Homepage weekend entry links into the full weather recommendation page.
+- Souvenir memory workbench at `/souvenirs` with upload/camera thumbnails, city and Trip association, 2.5D/plain card modes, local PNG share cards, and annual-report seed data.
+- City detail pages show same-city souvenirs, and `/settings` can count/delete local souvenir records.
 - Guest save prompt for account binding without blocking local storage.
 - Trip, Footprint, and SharePoster deletion from local data management.
 - Editable itinerary result page with local save-to-planned persistence.

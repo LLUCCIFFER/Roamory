@@ -113,6 +113,36 @@ export type PhotoMemoryCandidate = {
   updatedAt: string;
 };
 
+export type SouvenirDisplayMode = "card" | "layered";
+
+export type SouvenirMemory = {
+  id: string;
+  title: string;
+  city: string;
+  tripId?: string;
+  note: string;
+  imageDataUrl?: string;
+  shareImageDataUrl?: string;
+  tags: string[];
+  displayMode: SouvenirDisplayMode;
+  privacy: FootprintPrivacy;
+  capturedAt: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AnnualReportSeed = {
+  year: number;
+  generatedAt: string;
+  tripCount: number;
+  cityCount: number;
+  souvenirCount: number;
+  photoMemoryCount: number;
+  topCities: Array<{ city: string; count: number }>;
+  tags: string[];
+  source: "local";
+};
+
 export type SharePosterTemplate = "diary" | "route" | "memory";
 
 export type SharePosterPrivacy = {
@@ -162,6 +192,7 @@ export const generationTaskStorageKey = "roamory.generationTask";
 export const savedTripsStorageKey = "roamory.savedTrips";
 export const footprintsStorageKey = "roamory.footprints";
 export const photoMemoryCandidatesStorageKey = "roamory.photoMemoryCandidates";
+export const souvenirsStorageKey = "roamory.souvenirs";
 export const userProfileStorageKey = "roamory.userProfile";
 export const preferenceSettingsStorageKey = "roamory.preferenceSettings";
 export const privacySettingsStorageKey = "roamory.privacySettings";
@@ -288,6 +319,88 @@ export function updatePhotoMemoryCandidateStatus(
 
 export function deletePhotoMemoryCandidate(candidateId: string) {
   savePhotoMemoryCandidates(readPhotoMemoryCandidates().filter((candidate) => candidate.id !== candidateId));
+}
+
+function sortSouvenirs(souvenirs: SouvenirMemory[]) {
+  return [...souvenirs].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}
+
+export function readSouvenirs(): SouvenirMemory[] {
+  const saved = window.localStorage.getItem(souvenirsStorageKey);
+  if (!saved) return [];
+  try {
+    const parsed = JSON.parse(saved) as SouvenirMemory[];
+    return Array.isArray(parsed)
+      ? sortSouvenirs(parsed.filter((souvenir) => souvenir.id && souvenir.city && souvenir.title))
+      : [];
+  } catch {
+    window.localStorage.removeItem(souvenirsStorageKey);
+    return [];
+  }
+}
+
+export function saveSouvenirs(souvenirs: SouvenirMemory[]) {
+  window.localStorage.setItem(souvenirsStorageKey, JSON.stringify(sortSouvenirs(souvenirs)));
+}
+
+export function upsertSouvenir(souvenir: SouvenirMemory) {
+  const souvenirs = readSouvenirs();
+  const now = new Date().toISOString();
+  saveSouvenirs([
+    {
+      ...souvenir,
+      city: souvenir.city.trim(),
+      title: souvenir.title.trim(),
+      updatedAt: now
+    },
+    ...souvenirs.filter((item) => item.id !== souvenir.id)
+  ]);
+}
+
+export function deleteSouvenir(souvenirId: string) {
+  saveSouvenirs(readSouvenirs().filter((souvenir) => souvenir.id !== souvenirId));
+}
+
+export function readSouvenirsByCity(city: string): SouvenirMemory[] {
+  const key = cityKey(city);
+  if (!key) return [];
+  return readSouvenirs().filter((souvenir) => cityKey(souvenir.city) === key);
+}
+
+export function buildAnnualReportSeed(year = new Date().getFullYear()): AnnualReportSeed {
+  const trips = readSavedTrips().filter((trip) => getYear(trip.startDate || trip.savedAt || trip.createdAt) === year);
+  const footprints = readFootprints().filter((footprint) => getYear(footprint.lastVisitedAt) === year);
+  const souvenirs = readSouvenirs().filter((souvenir) => getYear(souvenir.capturedAt) === year);
+  const photoMemories = readPhotoMemoryCandidates().filter((candidate) => getYear(candidate.startDate) === year);
+  const cityCounts = new Map<string, number>();
+  const tags = new Set<string>();
+
+  trips.forEach((trip) => {
+    cityCounts.set(trip.destination, (cityCounts.get(trip.destination) ?? 0) + 1);
+    trip.days.flatMap((day) => day.stops).flatMap((stop) => stop.tags).forEach((tag) => tags.add(tag));
+  });
+  footprints.forEach((footprint) => {
+    cityCounts.set(footprint.city, (cityCounts.get(footprint.city) ?? 0) + footprint.visitCount);
+  });
+  souvenirs.forEach((souvenir) => {
+    cityCounts.set(souvenir.city, (cityCounts.get(souvenir.city) ?? 0) + 1);
+    souvenir.tags.forEach((tag) => tags.add(tag));
+  });
+
+  return {
+    year,
+    generatedAt: new Date().toISOString(),
+    tripCount: trips.length,
+    cityCount: new Set([...trips.map((trip) => trip.destination), ...footprints.map((item) => item.city)]).size,
+    souvenirCount: souvenirs.length,
+    photoMemoryCount: photoMemories.length,
+    topCities: [...cityCounts.entries()]
+      .map(([city, count]) => ({ city, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5),
+    tags: [...tags].slice(0, 8),
+    source: "local"
+  };
 }
 
 export function defaultPreferenceSettings(): PreferenceSettings {
@@ -438,6 +551,12 @@ function normalizeCityName(city: string) {
 
 function cityKey(city: string) {
   return normalizeCityName(city).toLocaleLowerCase();
+}
+
+function getYear(value: string | undefined) {
+  if (!value) return new Date().getFullYear();
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? new Date().getFullYear() : date.getFullYear();
 }
 
 function sortFootprints(footprints: FootprintCity[]) {

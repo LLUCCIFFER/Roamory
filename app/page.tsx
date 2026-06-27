@@ -15,6 +15,7 @@ import {
   LockKeyhole,
   Map,
   MapPinned,
+  PackageOpen,
   Plane,
   Plus,
   Route,
@@ -36,6 +37,7 @@ import {
   readFootprints,
   readGuestDraft,
   readSavedTrips,
+  readSouvenirs,
   saveGenerationTask,
   saveGuestDraft,
   toggleFootprintPrivacy,
@@ -56,6 +58,7 @@ export default function Home() {
   const [draft, setDraft] = useState<GuestDraft | null>(null);
   const [footprints, setFootprints] = useState<FootprintCity[]>([]);
   const [savedTrips, setSavedTrips] = useState<SavedTrip[]>([]);
+  const [souvenirCount, setSouvenirCount] = useState(0);
   const [showTrip, setShowTrip] = useState(false);
 
   const destination = destinations[activeDestination];
@@ -107,6 +110,7 @@ export default function Home() {
   function refreshLocalMemory() {
     setFootprints(readFootprints());
     setSavedTrips(readSavedTrips());
+    setSouvenirCount(readSouvenirs().length);
   }
 
   return (
@@ -251,7 +255,12 @@ export default function Home() {
           <FootprintPanel footprints={footprints} savedTrips={savedTrips} onChange={refreshLocalMemory} />
         )}
         {activeTab === "mine" && (
-          <MinePanel draft={draft} savedTripCount={savedTrips.length} footprintCount={footprints.length} />
+          <MinePanel
+            draft={draft}
+            savedTripCount={savedTrips.length}
+            footprintCount={footprints.length}
+            souvenirCount={souvenirCount}
+          />
         )}
       </section>
 
@@ -594,11 +603,13 @@ function formatFootprintDate(value: string) {
 function MinePanel({
   draft,
   savedTripCount,
-  footprintCount
+  footprintCount,
+  souvenirCount
 }: {
   draft: GuestDraft | null;
   savedTripCount: number;
   footprintCount: number;
+  souvenirCount: number;
 }) {
   return (
     <section className="placeholder-panel glass-card">
@@ -608,6 +619,7 @@ function MinePanel({
       <div className="memory-list">
         <span>{savedTripCount} 条行程</span>
         <span>{footprintCount} 个足迹</span>
+        <span>{souvenirCount} 个纪念品</span>
       </div>
       <Link className="secondary-action action-link" href="/settings?panel=account&login=1">
         <Plus size={16} />
@@ -616,6 +628,10 @@ function MinePanel({
       <Link className="secondary-action action-link" href="/memories">
         <ImagePlus size={16} />
         打开相册记忆
+      </Link>
+      <Link className="secondary-action action-link" href="/souvenirs">
+        <PackageOpen size={16} />
+        打开纪念品盒
       </Link>
     </section>
   );

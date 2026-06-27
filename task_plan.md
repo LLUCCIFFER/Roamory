@@ -173,6 +173,19 @@ Complete
 - [x] Create and push a local git commit for this round.
 - **Status:** complete
 
+### Phase 18: Round 13 Souvenir Memory & Annual Report Seed
+- [x] Add local souvenir memory and annual-report seed data models.
+- [x] Add `/souvenirs` workbench with upload/camera thumbnail input.
+- [x] Support city and Trip association for souvenir cards.
+- [x] Support 2.5D layered display and plain-card fallback.
+- [x] Generate a local PNG share card for each souvenir.
+- [x] Connect souvenir counts to the homepage Mine panel.
+- [x] Show same-city souvenirs on `/footprints/[city]`.
+- [x] Add souvenir deletion to `/settings` local data management.
+- [x] Update README, TODO, findings, and progress notes.
+- [x] Run typecheck and browser regression checks.
+- **Status:** complete
+
 ## Key Questions
 1. What is the smallest valuable MVP loop for Roamory?
 2. Which features should be P0, P1, and P2 to avoid scope creep?
@@ -211,6 +224,7 @@ Complete
 | Separate Gaode Web Service keys from browser JS API keys | Server routes use `AMAP_WEB_SERVICE_KEY`; browser map rendering uses `NEXT_PUBLIC_AMAP_JSAPI_KEY` and can safely fall back when absent. |
 | Build photo memory as local-first thumbnail workflow | It satisfies P1 privacy constraints before platform photo-library integrations or server clustering are introduced. |
 | Build Round 12 weather as Open-Meteo forecast adapter plus local transport-radius estimates | It validates the no-key weather loop now while keeping city-to-city routing replaceable by Gaode later. |
+| Build Round 13 souvenirs as local-first 2.5D cards before real 3D | It validates emotional value and sharing without introducing heavy asset processing or commerce dependencies. |
 
 ## Errors Encountered
 | Error | Attempt | Resolution |

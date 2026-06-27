@@ -592,3 +592,27 @@ Notes:
 | Security audit | `npm audit --audit-level=moderate` | No moderate+ vulnerabilities | Passed | Pass |
 | Desktop visual check | 1440px production screenshot | No console errors or horizontal overflow | Passed; screenshot updated at `artifacts/weekend-desktop.png` | Pass |
 | Mobile visual check | 390px production screenshot | No console errors or horizontal overflow | Passed; screenshot captured locally | Pass |
+
+### Phase 18: Round 13 Souvenir Memory & Annual Report Seed
+- **Status:** complete
+- **Started:** 2026-06-27
+- Actions taken:
+  - Added `SouvenirMemory`, `SouvenirDisplayMode`, and `AnnualReportSeed` local data types in `lib/storage.ts`.
+  - Added local souvenir storage helpers, city filtering, deletion, and `buildAnnualReportSeed()`.
+  - Added `/souvenirs` with upload/camera thumbnail input, city and Trip association, 2.5D/plain display modes, sample card creation, local share-card PNG generation, and annual-report seed preview.
+  - Linked the homepage Mine panel to the souvenir box and added a local souvenir count.
+  - Extended `/footprints/[city]` so city detail pages show same-city souvenirs even without a saved Trip.
+  - Extended `/settings` data management with souvenir count and deletion.
+  - Added responsive souvenir and city-souvenir styles aligned to the blue-white watercolor reference.
+  - Captured demo screenshots at `artifacts/souvenirs-desktop.png`, `artifacts/souvenirs-mobile.png`, and `artifacts/souvenir-city-hangzhou-desktop.png`.
+  - Updated TODO, task plan, findings, README, and screenshot whitelist.
+
+## Test Results - 2026-06-27 Souvenir Memory
+| Test | Input | Expected | Actual | Status |
+|------|-------|----------|--------|--------|
+| TypeScript | `npm run typecheck` | No type errors | Passed | Pass |
+| Souvenir browser flow | `/souvenirs`, create sample, generate share card | A souvenir is saved and `shareImageDataUrl` is a PNG data URL | Passed | Pass |
+| City detail integration | `/footprints/杭州` after sample souvenir | City page shows at least one souvenir item | Passed | Pass |
+| Browser layout | 1440px and 390px viewports | No console errors, 400+ responses, or horizontal overflow | Passed | Pass |
+| Production build | `npm run build` | `/souvenirs` compiles with existing routes | Passed; `/souvenirs` first-load JS about 115 kB | Pass |
+| Security audit | `npm audit --audit-level=moderate` | No moderate+ vulnerabilities | Passed | Pass |

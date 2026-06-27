@@ -31,11 +31,13 @@ import {
   deleteFootprintCity,
   deleteSavedTrip,
   deleteSharePosterDraft,
+  deleteSouvenir,
   readFootprints,
   readPreferenceSettings,
   readPrivacySettings,
   readSavedTrips,
   readSharePosterDrafts,
+  readSouvenirs,
   readUserProfile,
   savePreferenceSettings,
   savePrivacySettings,
@@ -47,6 +49,7 @@ import type {
   PrivacySettings,
   SavedTrip,
   SharePosterDraft,
+  SouvenirMemory,
   UserProfile
 } from "../../lib/storage";
 
@@ -102,6 +105,7 @@ export default function SettingsPage() {
   const [savedTrips, setSavedTrips] = useState<SavedTrip[]>([]);
   const [footprints, setFootprints] = useState<FootprintCity[]>([]);
   const [posters, setPosters] = useState<SharePosterDraft[]>([]);
+  const [souvenirs, setSouvenirs] = useState<SouvenirMemory[]>([]);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -130,6 +134,7 @@ export default function SettingsPage() {
     setSavedTrips(readSavedTrips());
     setFootprints(readFootprints());
     setPosters(readSharePosterDrafts());
+    setSouvenirs(readSouvenirs());
   }
 
   function saveProfile() {
@@ -221,6 +226,12 @@ export default function SettingsPage() {
     deleteSharePosterDraft(draft.tripId);
     refreshLocalData();
     setMessage("分享海报草稿已删除；如曾有公开链接，也已尝试关闭。");
+  }
+
+  function removeSouvenir(souvenirId: string) {
+    deleteSouvenir(souvenirId);
+    refreshLocalData();
+    setMessage("纪念品已删除。");
   }
 
   async function clearAllData() {
@@ -477,6 +488,7 @@ export default function SettingsPage() {
                 <span>{savedTrips.length} 条旅行</span>
                 <span>{footprints.length} 个足迹</span>
                 <span>{posters.length} 份海报</span>
+                <span>{souvenirs.length} 个纪念品</span>
               </div>
 
               <DataList title="旅行">
@@ -537,6 +549,28 @@ export default function SettingsPage() {
                       </div>
                     );
                   })
+                )}
+              </DataList>
+
+              <DataList title="纪念品">
+                {souvenirs.length === 0 ? (
+                  <EmptyDataRow label="还没有保存的纪念品。" />
+                ) : (
+                  souvenirs.map((souvenir) => (
+                    <div className="data-row" key={souvenir.id}>
+                      <div>
+                        <strong>{souvenir.title}</strong>
+                        <span>{souvenir.city} · {souvenir.tags.slice(0, 3).join(" / ") || "未添加标签"}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeSouvenir(souvenir.id)}
+                        aria-label={`删除纪念品 ${souvenir.title}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))
                 )}
               </DataList>
 
