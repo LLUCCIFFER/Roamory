@@ -616,3 +616,33 @@ Notes:
 | Browser layout | 1440px and 390px viewports | No console errors, 400+ responses, or horizontal overflow | Passed | Pass |
 | Production build | `npm run build` | `/souvenirs` compiles with existing routes | Passed; `/souvenirs` first-load JS about 115 kB | Pass |
 | Security audit | `npm audit --audit-level=moderate` | No moderate+ vulnerabilities | Passed | Pass |
+
+### Phase 19: Round 14 AI Provider Adapter & Generation Retry
+- **Status:** complete locally; remote push pending
+- **Started:** 2026-06-27
+- Actions taken:
+  - Extended `lib/server/llm-adapter.ts` from mock-only to `mock`, Gemini, and Ollama providers.
+  - Added Gemini structured-output configuration using the shared TripPlan schema.
+  - Added Ollama `/api/generate` support with JSON Schema `format`.
+  - Added provider timeouts, configuration errors, provider errors, schema-validation fallback, and `LLM_ALLOW_MOCK_FALLBACK`.
+  - Added normalized provider, adapter, model, and fallback metadata to generation jobs and local generation tasks.
+  - Reworked the failure-page retry button so it creates a fresh queued task from the saved guest draft.
+  - Updated `.env.example`, README, TODO, findings, and task plan notes.
+
+## Test Results - 2026-06-27 AI Provider Adapter
+| Test | Input | Expected | Actual | Status |
+|------|-------|----------|--------|--------|
+| TypeScript | `npm run typecheck` | No type errors | Passed | Pass |
+| Default generation API | `POST /api/trips/generate` with Hangzhou draft | Generation succeeds through default provider | `succeeded`, `provider: mock`, `model: local-fixture` | Pass |
+| Invalid destination API | Blank destination draft | Clear failure status and error code | HTTP 422, `INVALID_DESTINATION` | Pass |
+| Gemini config guard | Temporary 3002 dev server with `LLM_PROVIDER=gemini` and no key | Clear provider configuration error | HTTP 422, `LLM_CONFIGURATION_MISSING` | Pass |
+| Failure retry UI | Failed local task on `/generating?taskId=ui-retry-bad` | Retry creates a new queued task | New `gen_*` task ID created; old failed ID not reused | Pass |
+| Production build | `npm run build` | App and API routes compile | Passed | Pass |
+| Security audit | `npm audit --audit-level=moderate` | No moderate+ vulnerabilities | Passed | Pass |
+| Dev preview restart | `http://127.0.0.1:3001/` | HTTP 200 after restart | Passed | Pass |
+| Route provider smoke | `POST /api/routes/calculate` after restart | Gaode route still confirmed with env key | `provider: gaode`, `status: confirmed` | Pass |
+
+Notes:
+- Real AI keys were not written to repo files. `.env.example` contains placeholders only.
+- The Gemini no-key check used a temporary port 3002 process that was stopped after the test.
+- The retry UI test intentionally produced one 422 response from an invalid destination; that console entry was expected.

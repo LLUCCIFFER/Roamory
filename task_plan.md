@@ -186,6 +186,18 @@ Complete
 - [x] Run typecheck and browser regression checks.
 - **Status:** complete
 
+### Phase 19: Round 14 AI Provider Adapter & Generation Retry
+- [x] Extend the LLM adapter from mock-only to `mock`, Gemini, and Ollama providers.
+- [x] Keep Gemini and Ollama behind the existing TripPlan JSON Schema structured-output contract.
+- [x] Add Provider configuration, timeout, configuration-error, provider-error, and mock-fallback handling.
+- [x] Record normalized adapter metadata, model, and fallback state on generation tasks.
+- [x] Turn the generation failure retry button into a fresh queued task from the saved guest draft.
+- [x] Update README, TODO, findings, and progress notes.
+- [x] Run typecheck for the new adapter and generation page changes.
+- [x] Run production build, audit, API/browser checks, and create the local git commit.
+- [ ] Push local commits to GitHub after `github.com:443` connectivity is restored.
+- **Status:** implementation complete; remote push pending
+
 ## Key Questions
 1. What is the smallest valuable MVP loop for Roamory?
 2. Which features should be P0, P1, and P2 to avoid scope creep?
@@ -225,6 +237,8 @@ Complete
 | Build photo memory as local-first thumbnail workflow | It satisfies P1 privacy constraints before platform photo-library integrations or server clustering are introduced. |
 | Build Round 12 weather as Open-Meteo forecast adapter plus local transport-radius estimates | It validates the no-key weather loop now while keeping city-to-city routing replaceable by Gaode later. |
 | Build Round 13 souvenirs as local-first 2.5D cards before real 3D | It validates emotional value and sharing without introducing heavy asset processing or commerce dependencies. |
+| Use Gemini and Ollama behind the existing LLM Adapter | It validates real structured AI generation without binding Roamory's business layer to a single model vendor. |
+| Keep `mock` as the development default with fallback enabled | It preserves the guest MVP flow when external AI keys, local Ollama, or network access are unavailable. |
 
 ## Errors Encountered
 | Error | Attempt | Resolution |

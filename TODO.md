@@ -143,7 +143,7 @@ frontend-design 使用重点：
 - [ ] 实现 Memory Atlas Strip 初版，用于行程结果页。
 - [x] 准备杭州 3 日 mock Trip。
 - [x] generationTask 成功后跳转行程结果页。
-- [ ] generationTask 失败时展示重试入口。
+- [x] generationTask 失败时展示重试入口。
 
 frontend-design 使用重点：
 
@@ -155,7 +155,7 @@ frontend-design 使用重点：
 
 - [x] 生成过程可见。
 - [x] mock 成功后进入 `/trips/[tripId]`。
-- [ ] mock 失败可重试。
+- [x] mock/AI Provider 失败可重试。
 
 ---
 
@@ -232,7 +232,7 @@ frontend-design 使用重点：
 - [x] 实现 `GET /api/trips/generate/{id}`。
 - [x] 接入 POI 检索 mock/真实适配器。
 - [x] 实现可替换 LLM Adapter。
-- [ ] 接入首个 LLM 服务配置：Gemini free tier 或本地 Ollama，继续复用当前 LLM Adapter + TripPlan JSON Schema。
+- [x] 接入首个 LLM 服务配置：Gemini structured output 与本地 Ollama 均复用当前 LLM Adapter + TripPlan JSON Schema。
 - [x] 对 LLM 输出做 JSON Schema 校验。
 - [x] Schema 校验失败时自动修复重试一次。
 - [x] 失败时返回明确 errorCode。
@@ -242,7 +242,7 @@ AI 约束：
 - [ ] 不允许 LLM 编造没有来源的 POI。
 - [ ] 坐标、营业时间、价格缺失时标记待确认。
 - [x] Schema 校验失败自动重试一次。
-- [x] AI 服务供应商不能泄漏到业务层和前端类型中。
+- [x] AI 服务原始响应不能泄漏到业务层和前端；前端只读取归一化的 Adapter 状态和错误码。
 
 验收：
 
@@ -434,6 +434,29 @@ frontend-design 使用重点：
 - [x] 城市详情能看到纪念品。
 - [x] 纪念品不生成 3D 时仍可作为普通卡片展示。
 - [x] 年度报告有可生成的数据基础。
+
+---
+
+## 第 14 轮：AI Provider Adapter 与生成失败兜底
+
+目标：让 AI 生成从本地 mock 过渡到可配置真实 Provider，同时保持游客流畅和结构化输出稳定。
+
+任务：
+
+- [x] 支持 `LLM_PROVIDER=mock|gemini|ollama`。
+- [x] Gemini 接入官方结构化输出 schema 配置，复用 TripPlan JSON Schema。
+- [x] Ollama 接入本地 `/api/generate` JSON schema `format`。
+- [x] 增加 Provider 超时、错误码、缺少 Key 的配置错误处理。
+- [x] Provider 请求失败或结构化校验失败时支持 mock fallback。
+- [x] generationTask 记录归一化 Adapter、模型和 fallback 状态。
+- [x] 失败页“重试生成”从游客草稿创建新任务，而不是简单刷新页面。
+- [x] 更新 `.env.example`、README、TODO 和进度文档。
+
+验收：
+
+- [x] 默认 `mock` Provider 不需要 Key，仍可完成生成链路。
+- [x] `LLM_PROVIDER=gemini` 未配置 Key 时返回明确 `LLM_CONFIGURATION_MISSING`。
+- [x] 生成失败时前端展示错误码并允许重新排队。
 
 ---
 

@@ -62,6 +62,120 @@ export type TripPlanValidationResult =
 export const tripPlanJsonSchema = {
   $id: "https://roamory.local/schema/trip-plan.v1.json",
   $schema: "https://json-schema.org/draft/2020-12/schema",
+  ...buildTripPlanOutputSchema(),
+  title: "Roamory TripPlan"
+} as const;
+
+export const tripPlanStructuredOutputSchema = buildTripPlanOutputSchema();
+
+function buildTripPlanOutputSchema() {
+  return {
+    title: "Roamory TripPlan",
+    type: "object",
+    required: [
+      "schemaVersion",
+      "id",
+      "title",
+      "destination",
+      "startDate",
+      "daysCount",
+      "budgetCny",
+      "travelMinutes",
+      "score",
+      "summary",
+      "warnings",
+      "routeProvider",
+      "routeStatus",
+      "days"
+    ],
+    properties: {
+      schemaVersion: { enum: ["trip-plan.v1"] },
+      id: { type: "string" },
+      title: { type: "string" },
+      destination: { type: "string" },
+      startDate: { type: "string" },
+      daysCount: { type: "integer" },
+      budgetCny: { type: "integer" },
+      travelMinutes: { type: "integer" },
+      score: { type: "integer" },
+      summary: { type: "string" },
+      warnings: { type: "array", items: { type: "string" } },
+      routeProvider: { enum: ["gaode", "mock"] },
+      routeStatus: { enum: ["confirmed", "pending"] },
+      days: {
+        type: "array",
+        items: {
+          type: "object",
+          required: ["day", "title", "budgetCny", "travelMinutes", "stops"],
+          properties: {
+            day: { type: "integer" },
+            title: { type: "string" },
+            budgetCny: { type: "integer" },
+            travelMinutes: { type: "integer" },
+            stops: {
+              type: "array",
+              items: {
+                type: "object",
+                required: [
+                  "id",
+                  "time",
+                  "name",
+                  "durationMinutes",
+                  "durationLabel",
+                  "transportToNext",
+                  "tags",
+                  "note",
+                  "source"
+                ],
+                properties: {
+                  id: { type: "string" },
+                  time: { type: "string" },
+                  name: { type: "string" },
+                  durationMinutes: { type: "integer" },
+                  durationLabel: { type: "string" },
+                  transportToNext: {
+                    type: "object",
+                    required: ["mode", "minutes", "label", "provider", "status"],
+                    properties: {
+                      mode: { enum: ["walking", "public_transport", "taxi", "driving", "mixed", "none"] },
+                      minutes: { type: "integer" },
+                      label: { type: "string" },
+                      provider: { enum: ["mock", "gaode", "user"] },
+                      status: { enum: ["confirmed", "pending"] }
+                    }
+                  },
+                  tags: { type: "array", items: { type: "string" } },
+                  note: { type: "string" },
+                  source: {
+                    type: "object",
+                    required: ["provider", "status"],
+                    properties: {
+                      provider: { enum: ["mock", "gaode", "user"] },
+                      status: { enum: ["confirmed", "pending"] },
+                      poiId: { type: "string" },
+                      coordinate: {
+                        type: "object",
+                        required: ["lat", "lng"],
+                        properties: {
+                          lat: { type: "number" },
+                          lng: { type: "number" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  } as const;
+}
+
+export const legacyTripPlanJsonSchema = {
+  $id: "https://roamory.local/schema/trip-plan.v1.json",
+  $schema: "https://json-schema.org/draft/2020-12/schema",
   title: "Roamory TripPlan",
   type: "object",
   additionalProperties: false,

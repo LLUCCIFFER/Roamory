@@ -45,6 +45,11 @@ Copy `.env.example` to `.env.local` for local provider tests. Do not commit real
 AMAP_WEB_SERVICE_KEY=your-gaode-web-service-key
 NEXT_PUBLIC_AMAP_JSAPI_KEY=your-gaode-jsapi-key
 NEXT_PUBLIC_AMAP_SECURITY_JS_CODE=your-gaode-jsapi-security-code
+LLM_PROVIDER=mock
+GEMINI_API_KEY=your-gemini-api-key
+GEMINI_MODEL=gemini-3.5-flash
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+OLLAMA_MODEL=llama3.2
 ```
 
 Current provider direction:
@@ -54,7 +59,7 @@ Current provider direction:
 - Weather recommendations: Open-Meteo forecast adapter in Round 12.
 - International route/geocoding fallback: reserved OpenRouteService adapter.
 - Low-frequency development geocoding: Nominatim only as a cached fallback, not a production core path.
-- AI trip generation: keep the LLM adapter replaceable; Gemini free tier or local Ollama can be wired next.
+- AI trip generation: replaceable LLM adapter with `mock`, Gemini structured output, and local Ollama options. Keep `LLM_ALLOW_MOCK_FALLBACK=true` during development so provider failures fall back to local generation instead of blocking the user.
 
 ## Current Build
 
@@ -63,7 +68,8 @@ Current provider direction:
 - Destination carousel with atmosphere selector and thumbnails.
 - Guest local-storage draft flow.
 - API-backed generation flow: `/create` -> `/generating` -> `/trips/mock-hangzhou`.
-- TripPlan JSON Schema, mock LLM adapter, schema validation, and repair retry.
+- TripPlan JSON Schema, replaceable LLM adapter, schema validation, repair retry, Gemini/Ollama configuration, normalized provider metadata, and local mock fallback.
+- Generation failure UI now shows normalized error codes and creates a fresh retry task from the saved guest draft.
 - Route calculation API at `/api/routes/calculate` with a normalized Gaode adapter boundary.
 - Gaode Web Service POI search and walking/transit/driving route calls when `AMAP_WEB_SERVICE_KEY` or `GAODE_WEB_SERVICE_KEY` is configured.
 - Route panel on `/trips/[tripId]` with Gaode JS SDK rendering when browser keys are configured, watercolor route fallback when they are absent, POI markers, daily route display, cache, reorder recalculation, confirmed durations when Gaode Web Service is available, and pending fallback when provider calls fail.

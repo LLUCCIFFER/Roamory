@@ -4,6 +4,9 @@ import type { GuestDraft, GenerationTask } from "../storage";
 import { tripPlanJsonSchema, type TripPlan } from "../trip-plan-schema";
 import {
   generateValidatedTripPlan,
+  LlmConfigurationError,
+  LlmProviderError,
+  type TravelGenerationProvider,
   TripPlanValidationError
 } from "./llm-adapter";
 
@@ -17,6 +20,10 @@ export type GenerationJob = {
   schemaVersion: string;
   repaired: boolean;
   validationErrors: string[];
+  provider: TravelGenerationProvider;
+  adapterName: string;
+  model?: string;
+  fallbackUsed: boolean;
   errorCode?: string;
   errorMessage?: string;
   createdAt: string;
@@ -53,6 +60,9 @@ export async function createGenerationJob(draft: GuestDraft) {
     schemaVersion: String(tripPlanJsonSchema.$id),
     repaired: false,
     validationErrors: [],
+    provider: "mock",
+    adapterName: "pending",
+    fallbackUsed: false,
     createdAt: now,
     updatedAt: now,
     createdAtMs: nowMs,
@@ -70,7 +80,11 @@ export async function createGenerationJob(draft: GuestDraft) {
       tripPlan: output.tripPlan,
       tripId: output.tripPlan.id,
       repaired: output.repaired,
-      validationErrors: output.validationErrors
+      validationErrors: output.validationErrors,
+      provider: output.provider,
+      adapterName: output.adapterName,
+      model: output.model,
+      fallbackUsed: output.fallbackUsed
     };
     generationJobs.set(job.id, job);
     return updateGenerationProgress(job);
@@ -123,6 +137,8 @@ function updateGenerationProgress(job: GenerationJob): GenerationJob {
 function getErrorCode(error: unknown) {
   if (error instanceof GenerationInputError) return error.code;
   if (error instanceof TripPlanValidationError) return "SCHEMA_VALIDATION_FAILED";
+  if (error instanceof LlmConfigurationError) return error.code;
+  if (error instanceof LlmProviderError) return error.code;
   return "GENERATION_FAILED";
 }
 
@@ -130,6 +146,12 @@ function getErrorMessage(error: unknown) {
   if (error instanceof GenerationInputError) return error.message;
   if (error instanceof TripPlanValidationError) {
     return "AI 输出未通过 TripPlan Schema 校验。";
+  }
+  if (error instanceof LlmConfigurationError) {
+    return "AI 服务未正确配置，请检查 LLM_PROVIDER 和对应 Key。";
+  }
+  if (error instanceof LlmProviderError) {
+    return "AI 服务请求失败，可以稍后重试或切回 mock provider。";
   }
   return "生成服务暂时不可用，请稍后重试。";
 }

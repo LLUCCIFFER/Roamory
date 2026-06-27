@@ -26,6 +26,10 @@ export type GenerationTask = {
   progress: number;
   tripId?: string;
   schemaVersion?: string;
+  provider?: "mock" | "gemini" | "ollama";
+  adapterName?: string;
+  model?: string;
+  fallbackUsed?: boolean;
   errorCode?: string;
   errorMessage?: string;
   draft: GuestDraft;

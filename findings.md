@@ -55,6 +55,8 @@
 - Nominatim usage policy: `https://operations.osmfoundation.org/policies/nominatim/`
 - Gemini API pricing: `https://ai.google.dev/gemini-api/docs/pricing`
 - Gemini API rate limits: `https://ai.google.dev/gemini-api/docs/rate-limits`
+- Gemini structured output docs: `https://ai.google.dev/gemini-api/docs/structured-output`
+- Ollama API docs: `https://github.com/ollama/ollama/blob/main/docs/api.md`
 
 ## Visual/Browser Findings
 - Reference image details: pastel sky-blue watercolor background; cloud and mountain texture; white lace dividers; rounded pill navigation; large rounded display heading; central beach/destination carousel; `SUMMER` season selector; thumbnail strip; translucent frosted diary card; profile/day-life diary section; stacked image cards; small circular icon buttons; decorative white flowers and butterflies; handwritten quote on a white panel.
@@ -112,3 +114,9 @@
 - Saving a souvenir lights the related city footprint, and `/footprints/[city]` now shows same-city souvenirs even when that city has no saved Trip yet.
 - `buildAnnualReportSeed()` now creates a local annual-report data foundation from saved trips, footprints, souvenirs, photo memories, top cities, and tags.
 - `/settings` local data management now counts and deletes souvenir records alongside Trips, Footprints, and SharePoster drafts.
+- Round 14 AI Provider work extends the LLM boundary from mock-only to `mock`, Gemini, and Ollama without changing the TripPlan contract.
+- Gemini uses the official structured-output `responseFormat` schema path for generateContent, with `gemini-3.5-flash` as the documented local default.
+- Ollama uses `/api/generate` with `stream: false` and a JSON Schema in `format`, matching the official structured-output API shape.
+- Generation jobs now store normalized adapter metadata, model name, fallback state, and provider-safe error codes. Raw provider responses still stay on the server side.
+- Provider request errors or TripPlan validation failures can fall back to the local mock adapter when `LLM_ALLOW_MOCK_FALLBACK=true`.
+- The generation failure page now creates a fresh queued task from the saved guest draft, so retrying does not depend on a full page reload.

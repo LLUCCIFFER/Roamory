@@ -14,8 +14,11 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ReactNode, Suspense, useEffect, useMemo, useState } from "react";
 import {
+  createQueuedTask,
   GenerationTask,
+  makeTaskId,
   readGenerationTask,
+  saveGuestDraft,
   saveGenerationTask
 } from "../../lib/storage";
 
@@ -28,6 +31,7 @@ const steps = [
 
 type GenerationApiResponse = {
   task?: GenerationTask;
+  errorCode?: string;
   message?: string;
 };
 
@@ -54,6 +58,28 @@ function GeneratingContent() {
     if (progress < 82) return 2;
     return 3;
   }, [progress]);
+
+  function retryGeneration() {
+    const sourceDraft = task?.draft ?? readGenerationTask()?.draft;
+    if (!sourceDraft) {
+      setMissing(true);
+      return;
+    }
+
+    const nextDraft = {
+      ...sourceDraft,
+      taskId: makeTaskId(),
+      savedAt: new Date().toISOString()
+    };
+    const nextTask = createQueuedTask(nextDraft);
+    saveGuestDraft(nextDraft);
+    saveGenerationTask(nextTask);
+    setServerError("");
+    setMissing(false);
+    setTask(nextTask);
+    setProgress(12);
+    router.replace(`/generating?taskId=${nextTask.id}`);
+  }
 
   useEffect(() => {
     const storedTask = readGenerationTask();
@@ -178,8 +204,9 @@ function GeneratingContent() {
           <AlertCircle size={34} />
           <h1>生成没有完成</h1>
           <p>{serverError || task?.errorMessage || "当前任务暂时不可用，可以重新尝试生成。"}</p>
+          {task?.errorCode && <span className="generation-error-code">{task.errorCode}</span>}
           <div className="generation-retry-row">
-            <button className="primary-action" type="button" onClick={() => window.location.reload()}>
+            <button className="primary-action" type="button" onClick={retryGeneration}>
               <RefreshCcw size={18} />
               重试生成
             </button>
@@ -226,6 +253,10 @@ function GeneratingContent() {
 
         <div className="generation-hints">
           <span>
+            <Sparkles size={16} />
+            {formatProviderLabel(task)}
+          </span>
+          <span>
             <MapPinned size={16} />
             高德路线校准
           </span>
@@ -237,6 +268,15 @@ function GeneratingContent() {
       </section>
     </GeneratingShell>
   );
+}
+
+function formatProviderLabel(task: GenerationTask | null) {
+  if (!task?.provider) return "AI Adapter 准备中";
+  const providerLabel =
+    task.provider === "gemini" ? "Gemini" : task.provider === "ollama" ? "Ollama" : "Mock";
+  const modelLabel = task.model ? ` · ${task.model}` : "";
+  const fallbackLabel = task.fallbackUsed ? " · 已降级 mock" : "";
+  return `${providerLabel}${modelLabel}${fallbackLabel}`;
 }
 
 function GeneratingShell({ children }: { children: ReactNode }) {
