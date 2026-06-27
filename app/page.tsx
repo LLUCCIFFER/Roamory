@@ -309,6 +309,7 @@ function CapsuleNav({
 }) {
   const items: Array<{ label: string; tab: Tab }> = [
     { label: "规划", tab: "plan" },
+    { label: "周末灵感", tab: "weekend" },
     { label: "足迹空间", tab: "footprint" },
     { label: "我的日记", tab: "mine" }
   ];
@@ -422,17 +423,26 @@ function MockTripPreview() {
 
 function WeekendPanel() {
   return (
-    <section className="placeholder-panel glass-card">
-      <CloudSun size={28} />
-      <h2>周末灵感</h2>
-      <p>高德天气与交通半径会在后续轮次接入。这里先保留氛围选择入口。</p>
-      <div className="chip-row">
-        {["晚霞", "海边", "雨后古镇", "露营"].map((item) => (
-          <button key={item} type="button">
-            {item}
-          </button>
+    <section className="weekend-home-panel glass-card">
+      <div className="section-title">
+        <div>
+          <p>Weekend Weather</p>
+          <h2>按天气挑一个近郊周末</h2>
+        </div>
+        <span>
+          <CloudSun size={22} />
+        </span>
+      </div>
+      <p>选择晚霞、晴天、海边、雨后古镇或雪景，再用交通半径筛出可当天往返的目的地。</p>
+      <div className="weather-evidence-list">
+        {["晚霞", "公共交通 3 小时内", "天气依据", "风险提示"].map((item) => (
+          <span key={item}>{item}</span>
         ))}
       </div>
+      <Link className="primary-action action-link" href="/weekend">
+        <Sparkles size={18} />
+        打开周末推荐
+      </Link>
     </section>
   );
 }

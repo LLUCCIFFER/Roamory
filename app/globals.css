@@ -194,8 +194,8 @@ h1 {
 
 .capsule-nav {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  width: min(520px, 100%);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(620px, 100%);
   height: 42px;
   padding: 4px;
   border: 1px solid rgba(79, 116, 132, 0.45);
@@ -2847,6 +2847,292 @@ textarea:focus {
   width: auto;
 }
 
+.weekend-page {
+  display: grid;
+  gap: 18px;
+  padding-bottom: 86px;
+}
+
+.weekend-hero,
+.weekend-layout,
+.weekend-home-panel {
+  position: relative;
+  z-index: 1;
+  width: min(1120px, 100%);
+  margin-inline: auto;
+}
+
+.weekend-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.45fr);
+  gap: 18px;
+  align-items: end;
+  border-radius: 8px;
+  padding: 28px;
+}
+
+.weekend-hero h1 {
+  margin-bottom: 10px;
+  color: var(--lake-ink);
+  font-size: clamp(42px, 7vw, 78px);
+  line-height: 0.98;
+}
+
+.weekend-hero p {
+  max-width: 680px;
+  margin-bottom: 0;
+  color: var(--lake-ink);
+  line-height: 1.65;
+}
+
+.weather-ribbon {
+  display: grid;
+  gap: 10px;
+  border-radius: 8px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.82), rgba(217, 241, 251, 0.58)),
+    repeating-linear-gradient(135deg, rgba(125, 201, 230, 0.18) 0 1px, transparent 1px 18px);
+  padding: 14px;
+}
+
+.weather-ribbon span,
+.recommendation-meta span,
+.recommendation-tags span,
+.weather-evidence-list span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--lake-ink);
+  padding: 0 11px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.weekend-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.42fr) minmax(0, 0.58fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.weekend-controls,
+.recommendation-card,
+.weather-warning,
+.weekend-home-panel {
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.weekend-controls {
+  position: sticky;
+  top: 22px;
+  display: grid;
+  gap: 16px;
+}
+
+.mood-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mood-grid button {
+  display: grid;
+  min-height: 106px;
+  align-content: start;
+  gap: 7px;
+  border: 1px solid rgba(79, 116, 132, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--lake-ink);
+  padding: 13px;
+  text-align: left;
+}
+
+.mood-grid button.active {
+  border-color: rgba(125, 201, 230, 0.84);
+  background: rgba(125, 201, 230, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.66);
+}
+
+.mood-grid strong {
+  color: var(--deep-ink);
+  font-size: 15px;
+}
+
+.mood-grid span {
+  color: rgba(79, 116, 132, 0.84);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.weekend-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.weather-source-note {
+  margin-bottom: 0;
+  color: rgba(79, 116, 132, 0.82);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.weekend-results {
+  display: grid;
+  gap: 14px;
+}
+
+.weather-warning {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  color: var(--lake-ink);
+}
+
+.weather-warning p {
+  margin-bottom: 0;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.weather-warning .secondary-action {
+  min-height: 38px;
+  white-space: nowrap;
+}
+
+.recommendation-card {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.recommendation-card::before {
+  position: absolute;
+  content: "";
+  inset: 0 auto 0 0;
+  width: 8px;
+  background: linear-gradient(180deg, var(--sea-glass), rgba(245, 184, 203, 0.72));
+}
+
+.recommendation-rank {
+  position: absolute;
+  right: 18px;
+  top: 12px;
+  color: rgba(79, 116, 132, 0.16);
+  font-family: Quicksand, Nunito, "Noto Sans SC", system-ui, sans-serif;
+  font-size: 62px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.recommendation-card header {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.recommendation-card header p {
+  margin-bottom: 4px;
+  color: var(--lake-ink);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.recommendation-card h2 {
+  margin-bottom: 0;
+  color: var(--deep-ink);
+  font-size: 2rem;
+}
+
+.recommendation-card header > strong {
+  display: inline-grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--sand-note);
+  color: var(--lake-ink);
+  font-size: 20px;
+}
+
+.recommendation-meta,
+.weather-evidence-list,
+.recommendation-tags {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.weather-risk-panel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  border-radius: 8px;
+  background: rgba(245, 184, 203, 0.14);
+  color: #744858;
+  padding: 12px;
+}
+
+.weather-risk-panel p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.recommendation-card .primary-action {
+  position: relative;
+  z-index: 1;
+}
+
+.loading-card {
+  min-height: 280px;
+  place-items: center;
+  text-align: center;
+}
+
+.loading-card p {
+  max-width: 420px;
+  margin-bottom: 0;
+  color: var(--lake-ink);
+  line-height: 1.6;
+}
+
+.weekend-home-panel {
+  display: grid;
+  gap: 16px;
+  min-height: 420px;
+  align-content: center;
+}
+
+.weekend-home-panel p {
+  max-width: 680px;
+  margin-bottom: 0;
+  color: var(--lake-ink);
+  line-height: 1.65;
+}
+
+.weekend-home-panel .primary-action {
+  width: min(280px, 100%);
+}
+
 .memory-page {
   display: grid;
   gap: 18px;
@@ -3097,6 +3383,8 @@ textarea:focus {
   .poster-layout,
   .settings-hero,
   .settings-layout,
+  .weekend-hero,
+  .weekend-layout,
   .city-hero,
   .city-detail-layout,
   .footprint-overview,
@@ -3152,6 +3440,10 @@ textarea:focus {
 
   .settings-tabs button {
     justify-content: center;
+  }
+
+  .weekend-controls {
+    position: static;
   }
 
   .footprint-search {
@@ -3220,6 +3512,11 @@ textarea:focus {
   .poster-hero,
   .poster-preview-panel,
   .poster-control-card,
+  .weekend-hero,
+  .weekend-controls,
+  .recommendation-card,
+  .weather-warning,
+  .weekend-home-panel,
   .settings-hero,
   .settings-panel {
     padding: 18px;
@@ -3234,6 +3531,9 @@ textarea:focus {
 
   .guest-link-prompt,
   .settings-form-grid,
+  .mood-grid,
+  .weekend-filter-grid,
+  .weather-warning,
   .settings-tabs {
     grid-template-columns: 1fr;
   }
@@ -3247,6 +3547,10 @@ textarea:focus {
 
   .poster-preview {
     width: 100%;
+  }
+
+  .weekend-hero h1 {
+    font-size: 2.5rem;
   }
 
   .poster-card {

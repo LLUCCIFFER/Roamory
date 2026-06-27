@@ -18,6 +18,8 @@ Roamory is a multi-end travel planning prototype. The first runnable surface is 
 
 ![Photo memory workbench](artifacts/memories-desktop.png)
 
+![Weekend weather recommendations](artifacts/weekend-desktop.png)
+
 ## Run
 
 ```bash
@@ -47,7 +49,7 @@ Current provider direction:
 
 - China POI and routes: Gaode Web Service API as the primary provider.
 - Browser map rendering: Gaode JavaScript API 2.0 through `@amap/amap-jsapi-loader`; the app falls back to the watercolor route sketch when JS API config is absent.
-- Weather recommendations: Open-Meteo in Round 12.
+- Weather recommendations: Open-Meteo forecast adapter in Round 12.
 - International route/geocoding fallback: reserved OpenRouteService adapter.
 - Low-frequency development geocoding: Nominatim only as a cached fallback, not a production core path.
 - AI trip generation: keep the LLM adapter replaceable; Gemini free tier or local Ollama can be wired next.
@@ -71,6 +73,8 @@ Current provider direction:
 - Photo memory workbench at `/memories` with local thumbnail import, file metadata clustering, candidate trips, merge/split, ignore, delete, and confirmation controls.
 - Confirmed photo memories generate local trips, save a cover thumbnail, and light the related footprint city.
 - Original image backup stays off by default; Round 11 only stores local thumbnails and file metadata.
+- Weekend weather recommendations at `/weekend` with Open-Meteo daily forecasts, mood selection, public-transport/driving radius filters, evidence chips, risk tips, cache/fallback handling, and one-day trip generation.
+- Homepage weekend entry links into the full weather recommendation page.
 - Guest save prompt for account binding without blocking local storage.
 - Trip, Footprint, and SharePoster deletion from local data management.
 - Editable itinerary result page with local save-to-planned persistence.

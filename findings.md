@@ -103,3 +103,6 @@
 - Round 11 photo memory is implemented as a local-first workbench at `/memories`: imported image files are resized into local thumbnails, file metadata is used for candidate clustering, and original images are not persisted.
 - Photo memory candidates support confirm, ignore, delete, merge, and split. Confirming a candidate creates a local planned Trip, stores its cover thumbnail, and lights the related footprint city.
 - True OS photo-library authorization, EXIF GPS parsing, server-side clustering, and original-image cloud backup remain platform/sync-stage work.
+- Round 12 weather recommendations are implemented at `/weekend` and `/api/weather/recommendations`: Open-Meteo daily forecast is normalized into Roamory cards for sunny, sunset, seaside, rainy-town, and snow moods.
+- Weather recommendations include weather evidence, city-to-city travel-radius estimates, risk tips, in-memory weather cache fallback, and local fallback recommendations if Open-Meteo is unavailable.
+- Round 12 transport time is still an app-owned estimate, not a confirmed Gaode intercity route. Replace the estimate behind the recommendation adapter when city-to-city route provider work starts.

@@ -161,6 +161,18 @@ Complete
 - [x] Create and push a local git commit for this round.
 - **Status:** complete
 
+### Phase 17: Round 12 Weekend Weather Recommendations
+- [x] Add app-owned weather recommendation types.
+- [x] Add Open-Meteo forecast adapter with in-memory cache and fallback recommendations.
+- [x] Add `/api/weather/recommendations`.
+- [x] Add `/weekend` with mood, transport mode, and travel-radius controls.
+- [x] Show recommendation cards with weather evidence, travel time, and risk tips.
+- [x] Generate a one-day guest draft from a recommendation.
+- [x] Link the weekend entry from homepage navigation.
+- [x] Run API, browser, production, and audit verification.
+- [x] Create and push a local git commit for this round.
+- **Status:** complete
+
 ## Key Questions
 1. What is the smallest valuable MVP loop for Roamory?
 2. Which features should be P0, P1, and P2 to avoid scope creep?
@@ -198,6 +210,7 @@ Complete
 | Reserve OpenRouteService, Nominatim, Gemini, and Ollama behind adapters | Keeps international fallback, low-frequency geocoding, and AI provider choices replaceable. |
 | Separate Gaode Web Service keys from browser JS API keys | Server routes use `AMAP_WEB_SERVICE_KEY`; browser map rendering uses `NEXT_PUBLIC_AMAP_JSAPI_KEY` and can safely fall back when absent. |
 | Build photo memory as local-first thumbnail workflow | It satisfies P1 privacy constraints before platform photo-library integrations or server clustering are introduced. |
+| Build Round 12 weather as Open-Meteo forecast adapter plus local transport-radius estimates | It validates the no-key weather loop now while keeping city-to-city routing replaceable by Gaode later. |
 
 ## Errors Encountered
 | Error | Attempt | Resolution |

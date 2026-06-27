@@ -569,3 +569,26 @@ Notes:
 | Photo memory desktop flow | Upload in-memory SVG, add sample pack, split, merge, confirm | Candidate trip becomes confirmed, Trip is created, footprint is lit, cover thumbnail saved | 3 candidates, 1 confirmed, 1 trip, 1 footprint, 1 album thumbnail key | Pass |
 | Desktop visual check | 1440px production screenshot | No console errors or horizontal overflow | Passed; screenshot updated at `artifacts/memories-desktop.png` | Pass |
 | Mobile visual check | 390px production screenshot | No console errors or horizontal overflow | Passed; screenshot captured locally | Pass |
+
+### Phase 17: Round 12 Weekend Weather Recommendations
+- **Status:** complete
+- **Started:** 2026-06-27
+- Actions taken:
+  - Added weather recommendation request/response types in `lib/weather-types.ts`.
+  - Added an Open-Meteo forecast adapter with normalized daily weather evidence, in-memory cache fallback, and local fallback recommendations.
+  - Added `POST` and default `GET` support for `/api/weather/recommendations`.
+  - Added `/weekend` with mood choices, departure city, transport mode, traffic-radius filter, weather recommendation cards, and one-day trip generation.
+  - Replaced the homepage weekend placeholder with a link into the full weekend page and added weekend to the capsule navigation.
+  - Captured a production-server demo screenshot for README at `artifacts/weekend-desktop.png`.
+  - Updated TODO, task plan, findings, README, and demo screenshot whitelist for Round 12.
+
+## Test Results - 2026-06-27 Weekend Weather Recommendations
+| Test | Input | Expected | Actual | Status |
+|------|-------|----------|--------|--------|
+| TypeScript | `npm run typecheck` | No type errors | Passed | Pass |
+| Weather API | `POST /api/weather/recommendations`, sunset + public transport + 180 minutes | Recommendations with Open-Meteo evidence | Returned 5 recommendations, `cacheStatus: open-meteo` | Pass |
+| Browser flow | `/weekend`, switch mood, refresh, generate one-day trip | Recommendation cards render and create guest draft | 5 cards, generated 1-day draft, routed to `/generating?taskId=...` | Pass |
+| Production build | `npm run build` | `/weekend` and weather API compile | Passed; `/weekend` first-load JS about 113 kB | Pass |
+| Security audit | `npm audit --audit-level=moderate` | No moderate+ vulnerabilities | Passed | Pass |
+| Desktop visual check | 1440px production screenshot | No console errors or horizontal overflow | Passed; screenshot updated at `artifacts/weekend-desktop.png` | Pass |
+| Mobile visual check | 390px production screenshot | No console errors or horizontal overflow | Passed; screenshot captured locally | Pass |
