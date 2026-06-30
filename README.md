@@ -4,23 +4,61 @@ Roamory is a multi-end travel planning prototype. The first runnable surface is 
 
 ## Demo Preview
 
+### Core Flow
+
 ![Roamory homepage](artifacts/home-desktop.png)
+
+![Create trip form](artifacts/create-desktop.png)
+
+![AI generation progress](artifacts/generating-api-desktop.png)
+
+![AI generation retry state](artifacts/generating-error-desktop.png)
 
 ![Editable trip result](artifacts/trip-edit-saved-desktop.png)
 
 ![Route calibration panel](artifacts/route-map-desktop.png)
 
-![Footprint space](artifacts/footprint-home-desktop.png)
+### Memory And Sharing
 
 ![Share poster workflow](artifacts/share-poster-desktop.png)
 
-![Privacy and data settings](artifacts/settings-desktop.png)
+![Public share diary](artifacts/public-share-desktop.png)
+
+![Footprint space](artifacts/footprint-home-desktop.png)
+
+![Footprint city detail](artifacts/footprint-city-hangzhou-desktop.png)
 
 ![Photo memory workbench](artifacts/memories-desktop.png)
 
 ![Weekend weather recommendations](artifacts/weekend-desktop.png)
 
 ![Souvenir memory workbench](artifacts/souvenirs-desktop.png)
+
+![Souvenir city memory](artifacts/souvenir-city-hangzhou-desktop.png)
+
+![Privacy and data settings](artifacts/settings-desktop.png)
+
+### Mobile Samples
+
+![Create trip mobile](artifacts/create-mobile.png)
+
+![Trip result mobile](artifacts/trip-edit-saved-mobile.png)
+
+![Share poster mobile](artifacts/share-poster-mobile.png)
+
+![Public share mobile](artifacts/public-share-mobile.png)
+
+![Footprint mobile](artifacts/footprint-home-mobile.png)
+
+![Footprint city mobile](artifacts/footprint-city-hangzhou-mobile.png)
+
+![Photo memory mobile](artifacts/memories-mobile.png)
+
+![Weekend mobile](artifacts/weekend-mobile.png)
+
+![Souvenirs mobile](artifacts/souvenirs-mobile.png)
+
+![Settings mobile](artifacts/settings-mobile.png)
 
 ## Run
 
